@@ -18,7 +18,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Career Map">
 <!-- 更新のたびにこの値を変える（例: 2026-09-10-1）。ホーム画面追加時の更新チェックに使用。 -->
-<meta name="app-version" content="2026-09-10-2">
+<meta name="app-version" content="2026-09-11-1">
 <style>
   :root{
     --bg:#f5f7fa; --card:#ffffff; --text:#1a1d23; --sub:#5b6472;
@@ -161,6 +161,9 @@
   .modal.detail-modal{height:min(640px, calc(100vh - 48px));}
   .modal-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);background:var(--card);border-radius:16px 16px 0 0;flex-shrink:0;}
   .modal-hd h2{font-weight:700;font-size:15px;margin:0;}
+  .name-inline-inp{font-size:16px;font-weight:700;border:1px solid transparent;background:transparent;border-radius:6px;padding:4px 6px;margin:-4px 0 0 -6px;width:calc(100% + 6px);color:var(--text);font-family:inherit;}
+  .name-inline-inp:hover{border-color:var(--border);}
+  .name-inline-inp:focus{border-color:var(--accent);background:var(--card);outline:none;}
   .modal-x{background:none;border:none;font-size:22px;color:var(--sub);cursor:pointer;line-height:1;}
   .modal-bd{padding:20px;overflow-y:auto;flex:1;min-height:0;}
   .dtab-row{width:100%;}
@@ -455,6 +458,27 @@ function applyAiFillToDraft(json){
     }
   });
   if(!editDraft.tags.includes('AI入力(要確認)')) editDraft.tags = [...editDraft.tags, 'AI入力(要確認)'];
+}
+// 既存企業の詳細モーダルからAI一括入力を反映する場合（編集モードを介さず直接保存する）
+function applyAiFillToCompany(id, json){
+  const fresh = companies.find(x=>x.id===id);
+  if(!fresh) return;
+  const updated = {...fresh, tags:[...(fresh.tags||[])]};
+  AI_FILL_KEYS.forEach(k=>{
+    if(json[k]===undefined || json[k]===null) return;
+    if(k==='tags'){
+      let t = json.tags;
+      if(typeof t==='string') t = t.split(/[,、]/).map(x=>x.trim()).filter(Boolean);
+      if(Array.isArray(t)) updated.tags = t.map(String);
+    } else if(k==='dsFit'){
+      const n = Number(json.dsFit);
+      if(!Number.isNaN(n)) updated.dsFit = Math.max(0, Math.min(5, Math.round(n)));
+    } else {
+      updated[k] = String(json[k]);
+    }
+  });
+  if(!updated.tags.includes('AI入力(要確認)')) updated.tags = [...updated.tags, 'AI入力(要確認)'];
+  saveCompanies(companies.map(x=>x.id===id?updated:x));
 }
 // ───────────────────────── 複数企業まとめてAI下書き ─────────────────────────
 // 企業を1社ずつ登録するのは手間がかかるため、複数社の企業名をまとめてAIに調べてもらい、
@@ -980,40 +1004,102 @@ function buildDetailModal(c){
   const tabBarHtml = `<div class="seg dtab-row">${tabs.map(t=>`<button data-dtab="${t.key}" class="${detailTab===t.key?'active':''}">${t.label}</button>`).join('')}</div>`;
 
   const overviewHtml = `
-        <div class="detail-grid">
-          <div class="k">業界(大分類)</div><div class="v">${esc(c.industryMajor||'—')}</div>
-          <div class="k">業界(詳細)</div><div class="v">${esc(c.industrySub||'—')}</div>
-          <div class="k">勤務地</div><div class="v">${esc(c.location||'—')}</div>
-          <div class="k">初任給・基本給</div><div class="v">${esc(c.salaryBase||'—')}</div>
-          <div class="k">初任給・手当額</div><div class="v">${esc(c.salaryAllowance||'—')}</div>
-          <div class="k">初任給・合計額</div><div class="v">${esc(c.salaryTotal||'—')}</div>
-          <div class="k">平均年収</div><div class="v">${esc(c.avgSalary||'—')}</div>
-          <div class="k">月残業</div><div class="v">${esc(c.overtime||'—')}</div>
-          <div class="k">有給取得率</div><div class="v">${esc(c.paidLeaveRate||'—')}</div>
-          <div class="k">年間休日</div><div class="v">${esc(c.annualHolidays||'—')}</div>
-          <div class="k">平均勤続年数</div><div class="v">${esc(c.avgTenure||'—')}</div>
-          <div class="k">離職率</div><div class="v">${esc(c.turnoverRate||'—')}</div>
-          <div class="k">転勤の有無</div><div class="v">${esc(c.transfer||'—')}</div>
-          <div class="k">リモート</div><div class="v">${esc(c.remote||'—')}</div>
-          <div class="k">従業員数</div><div class="v">${esc(c.employeeCount||'—')}</div>
+        <p class="note" style="margin:0 0 12px;">💡 このタブの項目は、入力欄の外をタップ（フォーカスを外す）すると自動的に保存されます。編集ボタンや保存操作は不要です。</p>
+        <div class="field">
+          <button type="button" class="btn btn-gray" id="btnToggleAiFill">🤖 AIに調べてもらって一括入力</button>
         </div>
-        <div class="detail-sec"><h3>事業内容</h3><p>${esc(c.mainBusiness||'—')}</p></div>
-        <div class="detail-sec"><h3>強み</h3><p>${esc(c.strengths||'—')}</p></div>
-        <div class="detail-sec"><h3>懸念点</h3><p>${esc(c.weaknesses||'—')}</p></div>
-        ${c.url?`<div class="detail-sec"><a href="${esc(normalizeUrl(c.url))}" target="_blank" rel="noopener">採用ページを見る →</a></div>`:''}
+        <div id="aiFillBox" style="display:none;margin-bottom:16px;background:var(--bg);border-radius:10px;padding:12px;">
+          <p class="note" style="margin:0 0 8px;">① 下のプロンプトをコピーし、ChatGPTやClaudeなどに貼り付けて送信 → ② 返ってきたJSONをそのまま下の欄に貼り付けて「反映」を押してください。</p>
+          <textarea class="ta" id="aiPrompt" rows="6" readonly style="font-size:11.5px;font-family:monospace;">${esc(buildAiPrompt(c.name))}</textarea>
+          <div style="text-align:right;margin-top:4px;"><button type="button" class="btn btn-gray btn-sm" id="btnCopyAiPrompt">📋 プロンプトをコピー</button></div>
+          <label class="lbl" style="margin-top:10px;">AIの回答（JSON）を貼り付け</label>
+          <textarea class="ta" id="aiResponse" rows="6" placeholder='{"industryMajor": "...", ...}' autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;flex-wrap:wrap;gap:6px;">
+            <p class="note" style="margin:0;">⚠️ AIが調べた内容は実際と異なる場合があります。反映後は必ず採用ページ等の一次情報で確認してください。</p>
+            <button type="button" class="btn btn-primary btn-sm" id="btnApplyAiFill">反映する</button>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label class="lbl">業界（大分類）</label>
+            <select class="sel" id="fIndustryMajor">
+              <option value="">未選択</option>
+              ${INDUSTRY_MAJOR_LIST.map(i=>`<option value="${esc(i)}" ${c.industryMajor===i?'selected':''}>${esc(i)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field"><label class="lbl">業界（詳細・候補から選択、なければ自由入力で追加）</label>
+            <input class="inp" id="fIndustrySub" list="industrySubList" value="${esc(c.industrySub)}">
+            <datalist id="industrySubList">${subOptions(c.industryMajor).map(i=>`<option value="${esc(i)}">`).join('')}</datalist>
+          </div>
+        </div>
+        <div class="field"><label class="lbl">勤務地</label><input class="inp" id="fLocation" value="${esc(c.location)}"></div>
+        <div class="field">
+          <label class="lbl">初任給の内訳</label>
+          <div class="grid2" style="grid-template-columns:1fr 1fr 1fr;gap:8px;">
+            <div><label class="lbl" style="font-weight:400;">基本給</label><input class="inp" id="fSalaryBase" value="${esc(c.salaryBase)}" placeholder="例: 22万円"></div>
+            <div><label class="lbl" style="font-weight:400;">手当額</label><input class="inp" id="fSalaryAllowance" value="${esc(c.salaryAllowance)}" placeholder="例: 1.5万円"></div>
+            <div><label class="lbl" style="font-weight:400;">合計額</label><input class="inp" id="fSalaryTotal" value="${esc(c.salaryTotal)}" placeholder="例: 23.5万円"></div>
+          </div>
+          <p class="note">数値のみ入力されている場合、合計額が空欄なら自動計算します。</p>
+        </div>
+        <div class="grid2">
+          <div class="field"><label class="lbl">平均年収</label><input class="inp" id="fAvg" value="${esc(c.avgSalary)}"></div>
+          <div></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label class="lbl">月残業</label><input class="inp" id="fOvertime" value="${esc(c.overtime)}"></div>
+          <div class="field"><label class="lbl">有給取得率</label><input class="inp" id="fPaid" value="${esc(c.paidLeaveRate)}"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label class="lbl">年間休日</label><input class="inp" id="fHolidays" value="${esc(c.annualHolidays)}" placeholder="例: 120日"></div>
+          <div class="field"><label class="lbl">平均勤続年数</label><input class="inp" id="fTenure" value="${esc(c.avgTenure)}" placeholder="例: 12.5年"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label class="lbl">離職率</label><input class="inp" id="fTurnover" value="${esc(c.turnoverRate)}"></div>
+          <div class="field"><label class="lbl">転勤の有無</label><input class="inp" id="fTransfer" value="${esc(c.transfer)}" placeholder="例: あり(全国)／なし"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label class="lbl">リモートワーク</label><input class="inp" id="fRemote" value="${esc(c.remote)}"></div>
+          <div class="field"><label class="lbl">従業員数</label><input class="inp" id="fEmployees" value="${esc(c.employeeCount)}" placeholder="例: 単体3,200名"></div>
+        </div>
+        <div class="field"><label class="lbl">スキル適性 (0〜5)</label><input class="inp" type="number" min="0" max="5" id="fDsFit" value="${c.dsFit||0}"><p class="note">自分の専攻・スキル・強みをどれだけ活かせそうかの目安（データサイエンス/ITに限らず、自分の専門性で読み替えてOK）</p></div>
+        <div class="field"><label class="lbl">タグ（カンマ区切り）</label><input class="inp" id="fTags" value="${esc((c.tags||[]).join(', '))}"></div>
+        <div class="field"><label class="lbl">事業内容</label><textarea class="ta" rows="2" id="fBiz">${esc(c.mainBusiness)}</textarea></div>
+        <div class="field"><label class="lbl">強み</label><textarea class="ta" rows="2" id="fStrengths">${esc(c.strengths)}</textarea></div>
+        <div class="field"><label class="lbl">懸念点</label><textarea class="ta" rows="2" id="fWeak">${esc(c.weaknesses)}</textarea></div>
+        <div class="field"><label class="lbl">採用ページURL</label><input class="inp" id="fUrl" value="${esc(c.url)}" placeholder="https://..."></div>
   `;
 
   const mystatusHtml = `
-        ${(c.mypageUrl||c.mypageId||c.mypagePassword)?`
-        <div class="detail-sec">
-          <h3>マイページ</h3>
-          <div class="mypage-box">
-            ${c.mypageId?`<div class="mypage-row"><span class="mypage-k">ID</span><span class="mypage-v">${esc(c.mypageId)}</span><button class="btn btn-gray btn-sm" data-copy="${esc(c.mypageId)}">コピー</button></div>`:''}
-            ${c.mypagePassword?`<div class="mypage-row"><span class="mypage-k">PW</span><span class="mypage-v mypage-pw" data-pw="${esc(c.mypagePassword)}">••••••••</span><button class="btn btn-gray btn-sm" data-togglepw="1">表示</button><button class="btn btn-gray btn-sm" data-copy="${esc(c.mypagePassword)}">コピー</button></div>`:''}
-            ${c.mypageUrl?`<a class="btn btn-primary btn-sm" style="display:inline-block;margin-top:6px;text-decoration:none;" href="${esc(normalizeUrl(c.mypageUrl))}" target="_blank" rel="noopener">🔑 マイページを開く</a>`:''}
+        <div class="detail-sec" style="margin-top:0;">
+          <h3>志望度（クリックで即反映）</h3>
+          <div class="chip-row" id="tierPickRow">
+            ${['S','A','B','C','D','その他'].map(t=>`<button type="button" class="chip" data-tierpick="${esc(t)}" style="${c.tier===t?`background:${TIER_COLOR[t]};border-color:${TIER_COLOR[t]};color:#fff;font-weight:700;`:''}">${esc(t)}</button>`).join('')}
+            <button type="button" class="chip${!c.tier?' active':''}" data-tierpick="">未設定</button>
           </div>
-        </div>`:`<div class="detail-sec"><h3>マイページ</h3><p class="note">未設定（編集画面から登録できます）</p></div>`}
-
+        </div>
+        <div class="detail-sec">
+          <h3>マイページ（応募者専用ページ）</h3>
+          <div class="grid2" style="margin-bottom:8px;">
+            <div>
+              <label class="lbl" style="font-weight:400;">マイページURL</label>
+              <input class="inp" id="fMypageUrl" value="${esc(c.mypageUrl||'')}" placeholder="https://...">
+            </div>
+            <div>
+              <label class="lbl" style="font-weight:400;">ログインID</label>
+              <div style="display:flex;gap:6px;">
+                <input class="inp" id="fMypageId" value="${esc(c.mypageId||'')}" style="flex:1;">
+                ${c.mypageId?`<button type="button" class="btn btn-gray btn-sm" data-copy="${esc(c.mypageId)}">コピー</button>`:''}
+              </div>
+            </div>
+          </div>
+          <label class="lbl" style="font-weight:400;">パスワード</label>
+          <div style="display:flex;gap:6px;">
+            <input class="inp" id="fMypagePassword" value="${esc(c.mypagePassword||'')}" style="flex:1;">
+            ${c.mypagePassword?`<button type="button" class="btn btn-gray btn-sm" data-copy="${esc(c.mypagePassword)}">コピー</button>`:''}
+          </div>
+          <p class="note">⚠️ このブラウザのlocalStorageに平文で保存されます。重要なパスワードの使い回しは避け、この企業専用のパスワードを設定することをおすすめします。</p>
+          ${c.mypageUrl?`<a class="btn btn-primary btn-sm" style="display:inline-block;margin-top:2px;text-decoration:none;" href="${esc(normalizeUrl(c.mypageUrl))}" target="_blank" rel="noopener">🔑 マイページを開く</a>`:''}
+        </div>
         <div class="detail-sec">
           <h3>自分のステータス</h3>
           <div class="status-pills">${STATUS_LIST.map(s=>`<button class="st-pill ${(c.status||[]).includes(s)?'on':''}" data-mystatus="${esc(s)}">${esc(s)}</button>`).join('')}</div>
@@ -1096,21 +1182,24 @@ function buildDetailModal(c){
         </div>
   `;
 
-  const bodyHtml = detailTab==='mystatus' ? mystatusHtml : detailTab==='events' ? eventsHtml : detailTab==='es' ? esHtml : overviewHtml;
-
   return `
     <div class="modal detail-modal">
-      <div class="modal-hd">
-        <h2>${esc(c.name)} ${tierBadge(c.tier)}</h2>
-        <div style="display:flex;gap:6px;align-items:center;">
-          ${(detailTab==='events'||detailTab==='es')?'':'<button class="icon-btn" id="btnEdit" title="編集">✏️</button>'}
+      <div class="modal-hd" style="align-items:flex-start;">
+        <div style="flex:1;min-width:0;">
+          <input class="inp name-inline-inp" id="fName" value="${esc(c.name)}">
+          <div style="margin-top:4px;">${tierBadge(c.tier)}</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
           <button class="icon-btn" id="btnDeleteCo" title="削除" style="color:var(--danger)">🗑</button>
           <button class="modal-x" id="closeDetail">&times;</button>
         </div>
       </div>
       <div style="padding:10px 20px 0;flex-shrink:0;">${tabBarHtml}</div>
       <div class="modal-bd">
-        ${bodyHtml}
+        <div data-dtabpage="overview" style="${detailTab==='overview'?'':'display:none;'}">${overviewHtml}</div>
+        <div data-dtabpage="mystatus" style="${detailTab==='mystatus'?'':'display:none;'}">${mystatusHtml}</div>
+        <div data-dtabpage="events" style="${detailTab==='events'?'':'display:none;'}">${eventsHtml}</div>
+        <div data-dtabpage="es" style="${detailTab==='es'?'':'display:none;'}">${esHtml}</div>
       </div>
     </div>
   `;
@@ -1224,8 +1313,14 @@ function buildEditModal(c){
 function bindOverlayEvents(c){
   const overlay = document.getElementById('overlay');
   overlay.addEventListener('click', e=>{ if(e.target===overlay){ closeOverlay(); afterChange(); } });
+  // 詳細モーダルのタブ切替（入力中の内容が消えないよう再描画はせずDOM操作のみで切替）
   overlay.querySelectorAll('[data-dtab]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{ detailTab = btn.dataset.dtab; if(detailTab!=='es') esEditingId=null; renderOverlay(); });
+    btn.addEventListener('click', ()=>{
+      const tab = btn.dataset.dtab;
+      detailTab = tab;
+      overlay.querySelectorAll('[data-dtab]').forEach(b=>b.classList.toggle('active', b===btn));
+      overlay.querySelectorAll('[data-dtabpage]').forEach(p=>{ p.style.display = (p.dataset.dtabpage===tab) ? '' : 'none'; });
+    });
   });
   // 編集モーダルの概要/ステータス タブ切替（入力中の内容が消えないよう再描画はせずDOM操作のみで切替）
   overlay.querySelectorAll('[data-edittab]').forEach(btn=>{
@@ -1239,9 +1334,6 @@ function bindOverlayEvents(c){
   const close2 = overlay.querySelector('#closeEdit'); if(close2) close2.addEventListener('click', ()=>{ closeOverlay(); afterChange(); });
   const cancelEdit = overlay.querySelector('#btnCancelEdit'); if(cancelEdit) cancelEdit.addEventListener('click', ()=>{ closeOverlay(); afterChange(); });
 
-  const btnEdit = overlay.querySelector('#btnEdit');
-  if(btnEdit) btnEdit.addEventListener('click', ()=>{ editDraft = JSON.parse(JSON.stringify(c)); editMode=true; renderOverlay(); });
-
   const majorSel = overlay.querySelector('#fIndustryMajor');
   if(majorSel){
     majorSel.addEventListener('change', ()=>{
@@ -1249,6 +1341,82 @@ function bindOverlayEvents(c){
       const subInput = overlay.querySelector('#fIndustrySub');
       subDatalist.innerHTML = subOptions(majorSel.value).map(i=>`<option value="${esc(i)}">`).join('');
       subInput.value = '';
+    });
+  }
+
+  // 既存企業の詳細モーダルでは「編集」モードを設けず、概要・ステータスの各項目は
+  // フォーカスを外す（change）たびに自動保存する。新規追加（editMode）の場合のみ、
+  // 一括入力後にまとめて保存ボタンで確定する従来の方式のまま。
+  if(!editMode && c && companies.some(x=>x.id===c.id)){
+    function freshCo(){ return companies.find(x=>x.id===c.id) || c; }
+    const fNameInp = overlay.querySelector('#fName');
+    if(fNameInp){
+      fNameInp.addEventListener('change', ()=>{
+        const name = fNameInp.value.trim();
+        if(!name){ fNameInp.value = freshCo().name; return; }
+        saveCompanies(companies.map(x=>x.id===c.id?{...freshCo(), name}:x));
+        afterChange();
+      });
+    }
+    function saveOverviewFields(){
+      const fresh = freshCo();
+      const industryMajor = overlay.querySelector('#fIndustryMajor').value;
+      const industrySub = overlay.querySelector('#fIndustrySub').value.trim();
+      let salaryBase = overlay.querySelector('#fSalaryBase').value.trim();
+      let salaryAllowance = overlay.querySelector('#fSalaryAllowance').value.trim();
+      let salaryTotal = overlay.querySelector('#fSalaryTotal').value.trim();
+      if(!salaryTotal && salaryBase && salaryAllowance){
+        const b = parseFloat(salaryBase), a = parseFloat(salaryAllowance);
+        if(!isNaN(b) && !isNaN(a) && /^[\d.]+$/.test(salaryBase) && /^[\d.]+$/.test(salaryAllowance)){
+          salaryTotal = String(Math.round((b+a)*100)/100) + (salaryBase.match(/[^\d.]+$/)?salaryBase.match(/[^\d.]+$/)[0]:'');
+        }
+      }
+      const updated = {
+        ...fresh,
+        industryMajor, industrySub,
+        location: overlay.querySelector('#fLocation').value,
+        salaryBase, salaryAllowance, salaryTotal,
+        avgSalary: overlay.querySelector('#fAvg').value,
+        overtime: overlay.querySelector('#fOvertime').value,
+        paidLeaveRate: overlay.querySelector('#fPaid').value,
+        annualHolidays: overlay.querySelector('#fHolidays').value,
+        avgTenure: overlay.querySelector('#fTenure').value,
+        turnoverRate: overlay.querySelector('#fTurnover').value,
+        transfer: overlay.querySelector('#fTransfer').value,
+        remote: overlay.querySelector('#fRemote').value,
+        employeeCount: overlay.querySelector('#fEmployees').value,
+        dsFit: Number(overlay.querySelector('#fDsFit').value)||0,
+        tags: overlay.querySelector('#fTags').value.split(',').map(s=>s.trim()).filter(Boolean),
+        mainBusiness: overlay.querySelector('#fBiz').value,
+        strengths: overlay.querySelector('#fStrengths').value,
+        weaknesses: overlay.querySelector('#fWeak').value,
+        url: normalizeUrl(overlay.querySelector('#fUrl').value),
+      };
+      registerSubIfNew(industryMajor, industrySub);
+      saveCompanies(companies.map(x=>x.id===c.id?updated:x));
+      afterChange();
+    }
+    ['fIndustryMajor','fIndustrySub','fLocation','fSalaryBase','fSalaryAllowance','fSalaryTotal','fAvg','fOvertime','fPaid','fHolidays','fTenure','fTurnover','fTransfer','fRemote','fEmployees','fDsFit','fTags','fBiz','fStrengths','fWeak','fUrl'].forEach(id=>{
+      const el = overlay.querySelector('#'+id);
+      if(el) el.addEventListener('change', saveOverviewFields);
+    });
+    overlay.querySelectorAll('[data-tierpick]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        saveCompanies(companies.map(x=>x.id===c.id?{...freshCo(), tier:btn.dataset.tierpick}:x));
+        renderOverlay(); afterChange();
+      });
+    });
+    function saveMypageFields(){
+      saveCompanies(companies.map(x=>x.id===c.id?{
+        ...freshCo(),
+        mypageUrl: normalizeUrl(overlay.querySelector('#fMypageUrl').value),
+        mypageId: overlay.querySelector('#fMypageId').value,
+        mypagePassword: overlay.querySelector('#fMypagePassword').value,
+      }:x));
+    }
+    ['fMypageUrl','fMypageId','fMypagePassword'].forEach(id=>{
+      const el = overlay.querySelector('#'+id);
+      if(el) el.addEventListener('change', saveMypageFields);
     });
   }
 
@@ -1280,8 +1448,14 @@ function bindOverlayEvents(c){
       if(!raw.trim()){ alert('AIの回答を貼り付けてください'); return; }
       let json;
       try{ json = parseAiJson(raw); }catch(e){ alert('JSONの読み取りに失敗しました。{ から } まで、AIの回答全体をそのまま貼り付けているか確認してください（一部だけコピーされていたり、文字が欠けていると失敗します）。'); return; }
-      applyAiFillToDraft(json);
-      alert('反映しました。内容を確認して保存してください（タグに「AI入力(要確認)」を追加しています）。');
+      if(editMode){
+        applyAiFillToDraft(json);
+        alert('反映しました。内容を確認して保存してください（タグに「AI入力(要確認)」を追加しています）。');
+      } else {
+        applyAiFillToCompany(c.id, json);
+        afterChange();
+        alert('反映しました。内容を確認してください（タグに「AI入力(要確認)」を追加しています。自動的に保存されています）。');
+      }
       renderOverlay();
     });
   }
