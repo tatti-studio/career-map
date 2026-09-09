@@ -17,6 +17,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Career Map">
+<!-- 更新のたびにこの値を変える（例: 2026-09-10-1）。ホーム画面追加時の更新チェックに使用。 -->
+<meta name="app-version" content="2026-09-10-1">
 <style>
   :root{
     --bg:#f5f7fa; --card:#ffffff; --text:#1a1d23; --sub:#5b6472;
@@ -66,6 +68,8 @@
   .status-filter-info{margin-top:8px;font-size:12px;background:var(--accent-soft);color:var(--accent);border-radius:8px;padding:6px 10px;display:flex;align-items:center;gap:8px;}
   .status-filter-info button{background:none;border:none;color:inherit;font-weight:700;cursor:pointer;font-size:12px;}
 
+  .update-banner{position:sticky;top:0;z-index:70;background:var(--accent);color:#fff;padding:10px 16px;font-size:13px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;text-align:center;}
+  .update-banner button{background:#fff;color:var(--accent);border:none;border-radius:7px;padding:6px 14px;font-size:12.5px;font-weight:700;cursor:pointer;flex-shrink:0;}
   .backup-box{margin-top:12px;background:var(--accent-soft);border:1px solid var(--accent);border-radius:10px;padding:10px 14px;font-size:12.5px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
   .backup-box span{color:var(--text);}
   .deadline-box{margin-top:12px;background:var(--danger-soft);border:1px solid #fca5a5;border-radius:10px;padding:10px 14px;font-size:12.5px;}
@@ -1772,6 +1776,39 @@ renderSummary();
 renderDeadlines();
 renderBackupReminder();
 renderContent();
+
+// ───────────────────────── 更新チェック（ホーム画面追加・古いキャッシュ対策）─────────────────────────
+// スマホでホーム画面に追加した場合、OS側が古いページを表示し続けてしまうことがある。
+// 表示中のページの<meta name="app-version">と、サーバー上の最新index.htmlのそれを比較し、
+// 差があれば「更新する」バナーを出す。キャッシュを迂回するため必ずno-storeでfetchする。
+function checkForAppUpdate(){
+  try{
+    const currentMeta = document.querySelector('meta[name="app-version"]');
+    const current = currentMeta ? currentMeta.content : '';
+    if(!current) return;
+    fetch(location.pathname + '?_v=' + Date.now(), { cache:'no-store' })
+      .then(r=>r.ok ? r.text() : null)
+      .then(html=>{
+        if(!html) return;
+        const m = html.match(/<meta name="app-version" content="([^"]*)"/);
+        const latest = m ? m[1] : '';
+        if(latest && latest!==current) showUpdateBanner();
+      })
+      .catch(()=>{});
+  }catch(e){}
+}
+function showUpdateBanner(){
+  if(document.getElementById('appUpdateBanner')) return;
+  const box = document.createElement('div');
+  box.id = 'appUpdateBanner';
+  box.className = 'update-banner';
+  box.innerHTML = `<span>🔄 新しいバージョンが公開されています</span><button id="btnReloadApp">更新する</button>`;
+  document.body.prepend(box);
+  document.getElementById('btnReloadApp').addEventListener('click', ()=>{
+    location.href = location.pathname + '?v=' + Date.now();
+  });
+}
+checkForAppUpdate();
 </script>
 
 </body>
