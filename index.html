@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Career Map - 就活比較</title>
+<meta name="description" content="企業比較・選考ステータス・カレンダー・マイページ管理・自己分析ノート・ES対策まで、就活に必要な情報を自分専用にまとめて管理できるツール。データはブラウザ内だけに保存され、外部には送信されません。">
+<meta property="og:title" content="Career Map - 就活比較">
+<meta property="og:description" content="企業比較・選考ステータス・カレンダー・マイページ管理・自己分析ノート・ES対策を一元管理できる、自分専用の就活管理ツール。データはブラウザ内だけに保存されます。">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#2f6fed">
 <link rel="icon" href="icon-192.png">
@@ -43,7 +48,16 @@
   nav.tabs button{border:none;background:none;padding:9px 14px;font-size:13px;font-weight:600;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;}
   nav.tabs button.active{color:var(--accent);border-bottom-color:var(--accent);}
 
-  .summary{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 0;}
+  .summary{display:flex;gap:8px;flex-wrap:wrap;margin:0;}
+  .collapse-block{margin-top:14px;}
+  .collapse-toggle{display:flex;align-items:center;gap:8px;width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:12.5px;font-weight:600;color:var(--sub);cursor:pointer;text-align:left;}
+  .collapse-toggle:hover{border-color:var(--accent);color:var(--accent);}
+  .collapse-chev{margin-left:auto;transition:transform .15s;color:var(--sub);}
+  .collapse-toggle.open .collapse-chev{transform:rotate(180deg);}
+  .collapse-toggle-badge{background:var(--accent);color:#fff;font-size:10px;font-weight:700;border-radius:999px;padding:1px 7px;}
+  .collapse-panel{display:grid;grid-template-rows:0fr;transition:grid-template-rows .22s ease;}
+  .collapse-panel.open{grid-template-rows:1fr;margin-top:8px;}
+  .collapse-inner{overflow:hidden;min-height:0;}
   .sum-pill{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:12px;min-width:70px;text-align:center;}
   .sum-pill b{display:block;font-size:17px;line-height:1.3;color:var(--accent);}
   .sum-pill-clickable{cursor:pointer;transition:border-color .15s,background .15s;}
@@ -139,6 +153,7 @@
   .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;display:none;align-items:center;justify-content:center;padding:24px 12px;}
   .modal{background:var(--card);border-radius:16px;width:100%;max-width:560px;max-height:calc(100vh - 48px);box-shadow:0 20px 60px rgba(0,0,0,.25);margin:auto;display:flex;flex-direction:column;overflow:hidden;}
   .modal.wide{max-width:820px;}
+  .modal.detail-modal{height:min(640px, calc(100vh - 48px));}
   .modal-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);background:var(--card);border-radius:16px 16px 0 0;flex-shrink:0;}
   .modal-hd h2{font-weight:700;font-size:15px;margin:0;}
   .modal-x{background:none;border:none;font-size:22px;color:var(--sub);cursor:pointer;line-height:1;}
@@ -234,7 +249,7 @@
   <div class="wrap">
     <div>
       <h1>Career Map - 就活比較</h1>
-      <p>企業データ・志望度・ステータス・メモ・予定はすべてこのブラウザに保存され、あなただけの「就活マップ」になります。企業の追加・編集・削除も自由に行えます。</p>
+      <p>企業比較・選考ステータス・カレンダー・マイページ管理・自己分析ノート・ES対策まで、就活に必要な情報をこのブラウザだけで一元管理できます（データは外部に送信されません）。</p>
     </div>
     <div class="hd-actions">
       <button class="icon-btn" id="btnTheme" title="表示テーマを切り替え">🌙</button>
@@ -254,26 +269,41 @@
       <button data-tab="calendar">📅 カレンダー</button>
       <button data-tab="profile">📝 自己分析ノート</button>
     </nav>
-    <div class="summary" id="summary"></div>
-    <div id="backupBox"></div>
+    <div class="collapse-block" id="summaryBlock">
+      <button type="button" class="collapse-toggle" id="btnToggleSummary">
+        <span>📊 登録状況サマリー</span><span class="collapse-chev">▾</span>
+      </button>
+      <div class="collapse-panel" id="summaryPanel">
+        <div class="collapse-inner"><div class="summary" id="summary"></div></div>
+      </div>
+    </div>
     <div id="deadlineBox"></div>
   </div>
 </header>
 
 <div class="wrap" id="listPage">
-  <div class="controls">
-    <input type="text" id="search" placeholder="企業名・キーワードで検索">
-    <select id="sort">
-      <option value="name">並び替え：企業名</option>
-      <option value="tier">志望度順</option>
-      <option value="dsfit_desc">スキル適性が高い順</option>
-      <option value="deadline">締切・予定が近い順</option>
-      <option value="favorite">お気に入り優先</option>
-    </select>
+  <div class="collapse-block">
+    <button type="button" class="collapse-toggle" id="btnToggleFilters">
+      <span>🔍 検索・並び替え・絞り込み</span><span class="collapse-toggle-badge" id="filterBadge" hidden></span><span class="collapse-chev">▾</span>
+    </button>
+    <div class="collapse-panel" id="filterPanel">
+      <div class="collapse-inner">
+        <div class="controls">
+          <input type="text" id="search" placeholder="企業名・キーワードで検索">
+          <select id="sort">
+            <option value="name">並び替え：企業名</option>
+            <option value="tier">志望度順</option>
+            <option value="dsfit_desc">スキル適性が高い順</option>
+            <option value="deadline">締切・予定が近い順</option>
+            <option value="favorite">お気に入り優先</option>
+          </select>
+        </div>
+        <p class="note" style="margin:6px 0 0;">志望度・業界は複数選択できます（「全ての志望度」「全業界」を押すと選択解除）。</p>
+        <div class="chip-row" id="tier-filters"></div>
+        <div class="chip-row" id="industry-filters"></div>
+      </div>
+    </div>
   </div>
-
-  <div class="chip-row" id="tier-filters"></div>
-  <div class="chip-row" id="industry-filters"></div>
 
   <div class="view-row">
     <div class="seg" id="viewSeg">
@@ -294,6 +324,7 @@
 <div class="wrap" id="calPage" style="display:none;"></div>
 <div class="wrap" id="profilePage" style="display:none;"></div>
 
+<div class="wrap"><div id="backupBox"></div></div>
 <footer>企業データは公開情報を基にした参考値を含みます（要確認の項目あり）。編集・追加した内容はこのブラウザにのみ保存されます。</footer>
 
 <div class="overlay" id="overlay"></div>
@@ -393,10 +424,14 @@ function buildAiPrompt(name){
 const AI_FILL_KEYS = ['industryMajor','industrySub','location','salaryBase','salaryAllowance','salaryTotal','avgSalary','overtime','paidLeaveRate','annualHolidays','avgTenure','turnoverRate','transfer','remote','employeeCount','mainBusiness','strengths','weaknesses','url','tags','dsFit'];
 function parseAiJson(raw){
   let s = raw.trim();
+  // 先頭のBOMや、スマホの自動置換で紛れ込みやすいスマート引用符(“”‘’)をストレートな引用符に正規化
+  s = s.replace(/^﻿/, '').replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
   const fence = s.match(/```(?:json)?\s*([\s\S]*?)```/i);
   if(fence) s = fence[1].trim();
   const start = s.indexOf('{'), end = s.lastIndexOf('}');
   if(start!==-1 && end!==-1 && end>start) s = s.slice(start, end+1);
+  // AIの出力に紛れることがある末尾カンマ（例: "a": 1,} ）を除去
+  s = s.replace(/,(\s*[}\]])/g, '$1');
   return JSON.parse(s);
 }
 function applyAiFillToDraft(json){
@@ -503,7 +538,7 @@ let companies = [];
 companies = loadCompanies();
 
 // ───────────────────────── 状態 ─────────────────────────
-let state = { search:"", tier:null, industry:null, sort:"name", view:"list", tab:"list", deadlineWindow:30, statusFilter:null, noteCategory:null };
+let state = { search:"", tierFilters:[], industryFilters:[], sort:"name", view:"list", tab:"list", deadlineWindow:30, statusFilter:null, noteCategory:null };
 let cmpMode = false;
 let cmpSel = [];
 let detailId = null;
@@ -554,11 +589,11 @@ function renderBackupReminder(){
   const overdue = days===null || days>=BACKUP_REMIND_DAYS;
   if(!overdue){ box.innerHTML=''; return; }
   const msg = days===null
-    ? 'まだ一度もバックアップ（JSONエクスポート）を行っていません。'
-    : `最後にバックアップしてから${days}日経過しています。`;
+    ? 'まだ一度も、入力したデータのコピーを保存したことがありません。'
+    : `入力したデータのコピーを、最後に保存してから${days}日経っています。`;
   box.innerHTML = `<div class="backup-box">
-    <span>💾 ${msg} 端末の故障やブラウザのデータ消去に備えて、データをエクスポートしておくことをおすすめします。</span>
-    <button class="btn btn-primary btn-sm" id="btnBackupNow">今すぐエクスポート</button>
+    <span>💾 ${msg} もしパソコンやスマホが壊れたり、ブラウザの履歴・データを消してしまったりすると、これまで入力した企業情報や予定はすべて消えてしまいます（このアプリはブラウザの中にしかデータを保存していないためです）。念のため、下のボタンから今のデータをファイルとして保存しておきましょう。</span>
+    <button class="btn btn-primary btn-sm" id="btnBackupNow">今のデータを保存する</button>
   </div>`;
   const btn = document.getElementById('btnBackupNow');
   if(btn) btn.addEventListener('click', ()=>{ const real = document.getElementById('btnExport'); if(real) real.click(); });
@@ -614,24 +649,37 @@ function renderDeadlines(){
 // ───────────────────────── フィルタ / 一覧描画 ─────────────────────────
 function renderFilters(){
   const tierBox = document.getElementById('tier-filters');
-  tierBox.innerHTML = '<span class="chip'+(state.tier===null?' active':'')+'" data-tier="all">全ての志望度</span>' +
-    ['S','A','B','C','D','その他'].map(t=>`<span class="chip${state.tier===t?' active':''}" data-tier="${t}">志望度 ${t}</span>`).join('') +
-    `<span class="chip${state.tier==='__unset'?' active':''}" data-tier="__unset">未設定</span>`;
+  tierBox.innerHTML = '<span class="chip'+(state.tierFilters.length===0?' active':'')+'" data-tier="all">全ての志望度</span>' +
+    ['S','A','B','C','D','その他'].map(t=>`<span class="chip${state.tierFilters.includes(t)?' active':''}" data-tier="${t}">志望度 ${t}</span>`).join('') +
+    `<span class="chip${state.tierFilters.includes('__unset')?' active':''}" data-tier="__unset">未設定</span>`;
   const indBox = document.getElementById('industry-filters');
-  indBox.innerHTML = '<span class="chip'+(state.industry===null?' active':'')+'" data-ind="all">全業界</span>' +
-    INDUSTRY_MAJOR_LIST.map(i=>`<span class="chip${state.industry===i?' active':''}" data-ind="${esc(i)}">${esc(i)}</span>`).join('');
+  indBox.innerHTML = '<span class="chip'+(state.industryFilters.length===0?' active':'')+'" data-ind="all">全業界</span>' +
+    INDUSTRY_MAJOR_LIST.map(i=>`<span class="chip${state.industryFilters.includes(i)?' active':''}" data-ind="${esc(i)}">${esc(i)}</span>`).join('');
   tierBox.querySelectorAll('.chip').forEach(el=>el.addEventListener('click',()=>{
-    state.tier = el.dataset.tier==='all'?null:el.dataset.tier; renderFilters(); renderContent();
+    if(el.dataset.tier==='all'){ state.tierFilters = []; }
+    else{
+      const v = el.dataset.tier;
+      state.tierFilters = state.tierFilters.includes(v) ? state.tierFilters.filter(x=>x!==v) : [...state.tierFilters, v];
+    }
+    renderFilters(); renderContent(); updateFilterBadge();
   }));
   indBox.querySelectorAll('.chip').forEach(el=>el.addEventListener('click',()=>{
-    state.industry = el.dataset.ind==='all'?null:el.dataset.ind; renderFilters(); renderContent();
+    if(el.dataset.ind==='all'){ state.industryFilters = []; }
+    else{
+      const v = el.dataset.ind;
+      state.industryFilters = state.industryFilters.includes(v) ? state.industryFilters.filter(x=>x!==v) : [...state.industryFilters, v];
+    }
+    renderFilters(); renderContent(); updateFilterBadge();
   }));
+  updateFilterBadge();
 }
 function applyFilters(){
   let list = companies.filter(c=>{
-    if(state.tier==='__unset' && c.tier) return false;
-    if(state.tier && state.tier!=='__unset' && c.tier!==state.tier) return false;
-    if(state.industry!==null && c.industryMajor!==state.industry) return false;
+    if(state.tierFilters.length>0){
+      const match = state.tierFilters.some(t=> t==='__unset' ? !c.tier : c.tier===t);
+      if(!match) return false;
+    }
+    if(state.industryFilters.length>0 && !state.industryFilters.includes(c.industryMajor)) return false;
     if(state.statusFilter && !(c.status||[]).includes(state.statusFilter)) return false;
     if(state.search){
       const q = state.search.toLowerCase();
@@ -917,7 +965,7 @@ function buildDetailModal(c){
   const bodyHtml = detailTab==='mystatus' ? mystatusHtml : detailTab==='events' ? eventsHtml : detailTab==='es' ? esHtml : overviewHtml;
 
   return `
-    <div class="modal">
+    <div class="modal detail-modal">
       <div class="modal-hd">
         <h2>${esc(c.name)} ${tierBadge(c.tier)}</h2>
         <div style="display:flex;gap:6px;align-items:center;">
@@ -959,7 +1007,7 @@ function buildEditModal(c){
             <textarea class="ta" id="aiPrompt" rows="6" readonly style="font-size:11.5px;font-family:monospace;">${esc(buildAiPrompt(c.name))}</textarea>
             <div style="text-align:right;margin-top:4px;"><button type="button" class="btn btn-gray btn-sm" id="btnCopyAiPrompt">📋 プロンプトをコピー</button></div>
             <label class="lbl" style="margin-top:10px;">AIの回答（JSON）を貼り付け</label>
-            <textarea class="ta" id="aiResponse" rows="6" placeholder='{"industryMajor": "...", ...}'></textarea>
+            <textarea class="ta" id="aiResponse" rows="6" placeholder='{"industryMajor": "...", ...}' autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false"></textarea>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;flex-wrap:wrap;gap:6px;">
               <p class="note" style="margin:0;">⚠️ AIが調べた内容は実際と異なる場合があります。反映後は必ず採用ページ等の一次情報で確認してください。</p>
               <button type="button" class="btn btn-primary btn-sm" id="btnApplyAiFill">反映する</button>
@@ -1096,7 +1144,7 @@ function bindOverlayEvents(c){
       const raw = overlay.querySelector('#aiResponse').value;
       if(!raw.trim()){ alert('AIの回答を貼り付けてください'); return; }
       let json;
-      try{ json = parseAiJson(raw); }catch(e){ alert('JSONの読み取りに失敗しました。AIの回答全体をそのまま貼り付けてください。'); return; }
+      try{ json = parseAiJson(raw); }catch(e){ alert('JSONの読み取りに失敗しました。{ から } まで、AIの回答全体をそのまま貼り付けているか確認してください（一部だけコピーされていたり、文字が欠けていると失敗します）。'); return; }
       applyAiFillToDraft(json);
       alert('反映しました。内容を確認して保存してください（タグに「AI入力(要確認)」を追加しています）。');
       renderOverlay();
@@ -1585,11 +1633,34 @@ document.getElementById('mainTabs').querySelectorAll('button').forEach(btn=>{
     document.getElementById('calPage').style.display = state.tab==='calendar' ? 'block':'none';
     document.getElementById('profilePage').style.display = state.tab==='profile' ? 'block':'none';
     document.getElementById('deadlineBox').style.display = state.tab==='calendar' ? '' : 'none';
+    document.getElementById('summaryBlock').style.display = state.tab==='list' ? '' : 'none';
     if(state.tab==='calendar') renderCalendarPage();
     if(state.tab==='profile') renderProfilePage();
   });
 });
 document.getElementById('deadlineBox').style.display = state.tab==='calendar' ? '' : 'none';
+document.getElementById('summaryBlock').style.display = state.tab==='list' ? '' : 'none';
+
+// ───────────────────────── 折りたたみブロック（サマリー／検索・絞り込み）─────────────────────────
+function bindCollapseToggle(btnId, panelId){
+  const btn = document.getElementById(btnId);
+  const panel = document.getElementById(panelId);
+  if(!btn || !panel) return;
+  btn.addEventListener('click', ()=>{
+    const open = !panel.classList.contains('open');
+    panel.classList.toggle('open', open);
+    btn.classList.toggle('open', open);
+  });
+}
+bindCollapseToggle('btnToggleSummary', 'summaryPanel');
+bindCollapseToggle('btnToggleFilters', 'filterPanel');
+function updateFilterBadge(){
+  const badge = document.getElementById('filterBadge');
+  if(!badge) return;
+  const n = (state.search?1:0) + state.tierFilters.length + state.industryFilters.length;
+  if(n>0){ badge.hidden=false; badge.textContent = `絞り込み中(${n})`; }
+  else badge.hidden = true;
+}
 
 // ───────────────────────── 設定メニュー（エクスポート/インポート/リセット）─────────────────────────
 document.getElementById('btnSettings').addEventListener('click', ()=>{
@@ -1646,7 +1717,7 @@ document.getElementById('btnReset').addEventListener('click', ()=>{
 });
 
 // ───────────────────────── その他イベント登録 ─────────────────────────
-document.getElementById('search').addEventListener('input', e=>{ state.search=e.target.value.trim(); renderContent(); });
+document.getElementById('search').addEventListener('input', e=>{ state.search=e.target.value.trim(); renderContent(); updateFilterBadge(); });
 document.getElementById('sort').addEventListener('change', e=>{ state.sort=e.target.value; renderContent(); });
 document.getElementById('viewSeg').querySelectorAll('button').forEach(btn=>{
   btn.addEventListener('click', ()=>{
