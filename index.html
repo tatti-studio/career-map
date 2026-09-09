@@ -1,0 +1,1707 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Career Map - 就活比較</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2f6fed">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Career Map">
+<style>
+  :root{
+    --bg:#f5f7fa; --card:#ffffff; --text:#1a1d23; --sub:#5b6472;
+    --border:#e2e6ec; --accent:#2f6fed; --accent-soft:#eaf1ff;
+    --tierS:#ef4444; --tierA:#f97316; --tierB:#eab308; --tierC:#60a5fa; --tierD:#9ca3af; --tierO:#c7cbd1;
+    --danger:#ef4444; --danger-soft:#fef2f2; --ok:#16a34a; --ok-soft:#f0fdf4;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --bg:#14161a; --card:#1d2027; --text:#eef0f3; --sub:#9aa3b2;
+      --border:#2b2f38; --accent:#5b8dff; --accent-soft:#20304f; --danger-soft:#3a2020; --ok-soft:#0f2a1a; }
+  }
+  :root[data-theme="dark"]{ --bg:#14161a; --card:#1d2027; --text:#eef0f3; --sub:#9aa3b2;
+    --border:#2b2f38; --accent:#5b8dff; --accent-soft:#20304f; --danger-soft:#3a2020; --ok-soft:#0f2a1a; }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;line-height:1.5;transition:background .2s,color .2s;}
+  a{color:var(--accent);}
+  button,input,select,textarea{font-family:inherit;}
+  button{transition:background .15s,border-color .15s,color .15s,box-shadow .15s,transform .1s;}
+  button:active{transform:scale(.97);}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 20px;}
+  header{padding:22px 20px 10px;}
+  header .wrap{padding:0;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+  h1{font-size:19px;margin:0 0 4px;}
+  header p{margin:0;color:var(--sub);font-size:12.5px;max-width:680px;}
+  .hd-actions{display:flex;gap:6px;flex-shrink:0;}
+
+  nav.tabs{display:flex;gap:4px;margin-top:16px;border-bottom:1px solid var(--border);}
+  nav.tabs button{border:none;background:none;padding:9px 14px;font-size:13px;font-weight:600;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;}
+  nav.tabs button.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+  .summary{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 0;}
+  .sum-pill{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:12px;min-width:70px;text-align:center;}
+  .sum-pill b{display:block;font-size:17px;line-height:1.3;color:var(--accent);}
+  .sum-pill-clickable{cursor:pointer;transition:border-color .15s,background .15s;}
+  .sum-pill-clickable:hover{border-color:var(--accent);}
+  .sum-pill-clickable.on{background:var(--accent-soft);border-color:var(--accent);}
+  .status-filter-info{margin-top:8px;font-size:12px;background:var(--accent-soft);color:var(--accent);border-radius:8px;padding:6px 10px;display:flex;align-items:center;gap:8px;}
+  .status-filter-info button{background:none;border:none;color:inherit;font-weight:700;cursor:pointer;font-size:12px;}
+
+  .backup-box{margin-top:12px;background:var(--accent-soft);border:1px solid var(--accent);border-radius:10px;padding:10px 14px;font-size:12.5px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .backup-box span{color:var(--text);}
+  .deadline-box{margin-top:12px;background:var(--danger-soft);border:1px solid #fca5a5;border-radius:10px;padding:10px 14px;font-size:12.5px;}
+  .deadline-box .dl-title{font-weight:700;color:#dc2626;margin-bottom:6px;}
+  .dl-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:2px 0;cursor:pointer;}
+  .dl-date{font-weight:700;font-variant-numeric:tabular-nums;}
+
+  .controls{margin-top:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+  .controls input[type=text]{flex:1 1 200px;padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:14px;}
+  .controls select{padding:9px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;}
+  .chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+  .chip{padding:6px 12px;border-radius:999px;border:1px solid var(--border);background:var(--card);font-size:12px;cursor:pointer;color:var(--sub);user-select:none;transition:background .15s,border-color .15s,color .15s;}
+  .chip:hover{border-color:var(--accent);color:var(--accent);}
+  .chip.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600;}
+
+  .view-row{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:8px;flex-wrap:wrap;}
+  .seg{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+  .seg button{border:none;background:var(--card);color:var(--sub);padding:7px 12px;font-size:12.5px;cursor:pointer;}
+  .seg button.active{background:var(--accent);color:#fff;}
+  .btn{border:none;border-radius:8px;font-weight:600;padding:8px 14px;font-size:12.5px;cursor:pointer;}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{filter:brightness(1.08);}
+  .btn-gray{background:var(--card);color:var(--text);border:1px solid var(--border);}
+  .btn-gray:hover{border-color:var(--accent);color:var(--accent);}
+  .btn-gray.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);}
+  .btn-red{background:var(--danger);color:#fff;}
+  .btn-red:hover{filter:brightness(1.08);}
+  .btn-sm{padding:6px 10px;font-size:11.5px;}
+  .icon-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;width:34px;height:34px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .icon-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+  .count{margin-top:10px;font-size:12px;color:var(--sub);}
+
+  .grid{margin-top:10px;padding-bottom:70px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px;cursor:pointer;position:relative;transition:box-shadow .15s,transform .15s,border-color .15s;}
+  .card:hover{box-shadow:0 6px 20px rgba(0,0,0,.08);transform:translateY(-2px);border-color:var(--accent);}
+  .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+  .card-top h2{font-size:15px;margin:0;line-height:1.4;}
+  .fav-star{background:none;border:none;font-size:16px;cursor:pointer;line-height:1;padding:2px;color:var(--border);flex-shrink:0;}
+  .fav-star.on{color:#f59e0b;}
+  .card-name-row{display:flex;align-items:flex-start;gap:4px;flex:1;min-width:0;}
+  .card-name-row h2{flex:1;min-width:0;overflow-wrap:anywhere;}
+  .mypage-inline{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:11px;margin-top:2px;background:var(--bg);border-radius:8px;padding:6px 8px;}
+  .mypage-inline-label{font-weight:700;color:var(--sub);white-space:nowrap;}
+  .mypage-inline-empty{color:var(--sub);}
+  .mypage-inline-val{font-weight:600;overflow-wrap:anywhere;}
+  .mypage-inline-pw{font-family:monospace;letter-spacing:1px;}
+  .mypage-inline-open{text-decoration:none;flex-shrink:0;white-space:nowrap;}
+  .mypage-inline button{background:none;border:none;cursor:pointer;font-size:12px;padding:0 2px;color:var(--sub);}
+  .mypage-inline button:hover{color:var(--accent);}
+  .tier{font-size:11px;font-weight:800;color:#fff;padding:3px 9px;border-radius:6px;white-space:nowrap;}
+  .tier.unset{background:var(--border);color:var(--sub);}
+  .industry{font-size:12px;color:var(--sub);}
+  .metrics{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin-top:4px;font-size:12px;}
+  .metric-label{color:var(--sub);}
+  .metric-val{font-weight:600;}
+  .fit{display:flex;align-items:center;gap:4px;margin-top:2px;}
+  .fit-dot{width:8px;height:8px;border-radius:50%;background:var(--border);}
+  .fit-dot.on{background:var(--accent);}
+  .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;}
+  .tag{font-size:10px;background:var(--accent-soft);color:var(--accent);padding:3px 7px;border-radius:6px;}
+  .my-status{font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px;display:inline-block;margin-top:2px;}
+  .compare-check{position:absolute;top:12px;right:12px;width:20px;height:20px;border-radius:6px;border:2px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;}
+  .compare-check.on{background:var(--accent);border-color:var(--accent);}
+  .empty{margin:40px 0;color:var(--sub);font-size:14px;text-align:center;}
+  .empty::before{content:'📭';display:block;font-size:32px;margin-bottom:8px;}
+  .note-group{margin-top:18px;}
+  .note-group-hd{font-size:13px;font-weight:700;color:var(--sub);margin:0 0 8px;padding-bottom:4px;border-bottom:1px solid var(--border);}
+  .note-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;}
+  .note-card-hd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+  .note-card-hd strong{font-size:13.5px;}
+  .note-card-actions{display:flex;gap:6px;flex-shrink:0;}
+  .note-card-body{font-size:13px;line-height:1.7;white-space:pre-wrap;margin-top:8px;color:var(--text);}
+
+  .tier-row{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;}
+  .tier-lbl{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:#fff;flex-shrink:0;}
+  .tier-lane{flex:1;display:flex;flex-wrap:wrap;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px;min-height:40px;}
+  .tier-chip{border:none;background:var(--bg);border-radius:8px;padding:6px 11px;font-size:12px;font-weight:600;color:var(--text);cursor:pointer;}
+  .tier-chip:hover{background:var(--accent-soft);color:var(--accent);}
+  .tier-empty{font-size:11px;color:var(--sub);align-self:center;margin-left:4px;}
+
+  .cmp-bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--border);padding:10px 20px;display:flex;justify-content:center;gap:10px;align-items:center;box-shadow:0 -4px 16px rgba(0,0,0,.08);z-index:40;}
+  .cmp-bar span{font-size:12.5px;color:var(--sub);}
+
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;display:none;align-items:center;justify-content:center;padding:24px 12px;}
+  .modal{background:var(--card);border-radius:16px;width:100%;max-width:560px;max-height:calc(100vh - 48px);box-shadow:0 20px 60px rgba(0,0,0,.25);margin:auto;display:flex;flex-direction:column;overflow:hidden;}
+  .modal.wide{max-width:820px;}
+  .modal-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);background:var(--card);border-radius:16px 16px 0 0;flex-shrink:0;}
+  .modal-hd h2{font-weight:700;font-size:15px;margin:0;}
+  .modal-x{background:none;border:none;font-size:22px;color:var(--sub);cursor:pointer;line-height:1;}
+  .modal-bd{padding:20px;overflow-y:auto;flex:1;min-height:0;}
+  .dtab-row{width:100%;}
+  .dtab-row button{flex:1;padding:8px 6px;font-size:11.5px;}
+  .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;font-size:12.5px;margin-top:6px;}
+  .detail-grid .k{color:var(--sub);}
+  .detail-grid .v{font-weight:600;}
+  .detail-sec{margin-top:16px;}
+  .detail-sec h3{font-size:12.5px;color:var(--sub);margin:0 0 4px;font-weight:700;}
+  .detail-sec p{font-size:13px;line-height:1.7;margin:0;white-space:pre-wrap;}
+  .mypage-box{background:var(--bg);border-radius:10px;padding:10px 12px;margin-top:6px;}
+  .mypage-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .mypage-row:last-child{margin-bottom:0;}
+  .mypage-k{font-size:11px;font-weight:700;color:var(--sub);width:24px;flex-shrink:0;}
+  .mypage-v{font-size:13px;font-weight:600;flex:1;overflow-wrap:anywhere;}
+  .mypage-pw{font-family:monospace;letter-spacing:1px;}
+  .btn-sm{padding:4px 9px;font-size:11px;border-radius:6px;}
+  .status-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .st-pill{padding:6px 11px;border-radius:999px;font-size:11.5px;font-weight:600;border:1px solid var(--border);cursor:pointer;background:var(--card);color:var(--sub);transition:background .15s,border-color .15s,color .15s;}
+  .st-pill:hover{border-color:var(--accent);}
+  .st-pill.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);}
+  .ta{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;background:var(--card);color:var(--text);resize:vertical;font-family:inherit;margin-top:6px;}
+  .inp{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;background:var(--card);color:var(--text);}
+  .sel{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;background:var(--card);color:var(--text);}
+  .lbl{display:block;font-size:11px;font-weight:700;color:var(--sub);margin-bottom:4px;}
+  .field{margin-bottom:12px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .ev-card{background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+  .ev-card-hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .ev-del{background:none;border:none;color:#f87171;font-size:14px;margin-left:auto;cursor:pointer;}
+  .btn-armed{background:var(--danger)!important;color:#fff!important;border-color:var(--danger)!important;font-size:11px!important;font-weight:700;}
+  .ev-memo{font-size:12px;color:var(--sub);margin-top:6px;white-space:pre-wrap;}
+  .ev-add{background:var(--bg);border-radius:10px;padding:10px;}
+  .ev-add-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;}
+  .ev-add-row input,.ev-add-row select{border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:12px;background:var(--card);color:var(--text);}
+  .ev-type-btn{padding:5px 10px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid var(--border);cursor:pointer;background:var(--card);color:var(--sub);}
+  .ev-type-btn.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .cmp-table{border-collapse:collapse;width:100%;font-size:12px;}
+  .cmp-table th,.cmp-table td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+  .cmp-table thead th{background:var(--accent-soft);}
+  .cmp-table thead th:first-child,.cmp-table td:first-child{text-align:left;background:var(--bg);position:sticky;left:0;min-width:78px;}
+  .table-wrap{overflow-x:auto;}
+  .form-actions{display:flex;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);}
+  footer{padding:0 20px 40px;color:var(--sub);font-size:11px;}
+  .note{font-size:11px;color:var(--sub);margin-top:2px;}
+
+  /* calendar */
+  .cal-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:14px;}
+  .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .cal-nav h3{margin:0;font-size:14px;font-weight:700;}
+  .cal-nav button{background:var(--bg);border:none;border-radius:8px;padding:5px 12px;font-size:15px;font-weight:700;cursor:pointer;color:var(--text);}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+  .cal-dh{text-align:center;font-size:11px;font-weight:700;padding:4px;color:var(--sub);}
+  .cal-dh.sun{color:#ef4444;} .cal-dh.sat{color:#60a5fa;}
+  .cal-cell{min-height:56px;border-radius:8px;padding:3px;cursor:pointer;background:var(--bg);}
+  .cal-cell.empty{background:none;cursor:default;}
+  .cal-cell.today{outline:2px solid var(--accent);}
+  .cal-cell.selected{background:var(--accent-soft);}
+  .cal-date{font-size:11px;font-weight:700;margin-bottom:2px;}
+  .cal-date.sun{color:#ef4444;} .cal-date.sat{color:#60a5fa;}
+  .cal-dot{font-size:9px;padding:1px 4px;border-radius:4px;margin-bottom:1px;white-space:nowrap;overflow:hidden;background:var(--accent-soft);color:var(--accent);}
+  .cal-detail{margin-top:14px;border-top:1px solid var(--border);padding-top:12px;}
+  .settings-menu{position:absolute;right:20px;top:60px;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.15);padding:6px;z-index:60;display:none;min-width:200px;}
+  .settings-menu.open{display:block;}
+  .settings-menu button{display:block;width:100%;text-align:left;background:none;border:none;padding:9px 10px;font-size:12.5px;color:var(--text);cursor:pointer;border-radius:6px;}
+  .settings-menu button:hover{background:var(--bg);}
+  @media (max-width:520px){
+    .wrap{padding:0 12px;}
+    .cal-wrap{padding:10px;border-radius:10px;}
+    .cal-grid{gap:2px;}
+    .cal-cell{min-height:40px;padding:2px;border-radius:6px;}
+    .cal-date{font-size:10px;}
+    .cal-dh{font-size:9.5px;padding:2px;}
+    .cal-dot{font-size:7.5px;padding:1px 3px;margin-bottom:0;}
+    .cal-nav h3{font-size:12.5px;}
+    .cal-nav button{padding:4px 9px;font-size:13px;}
+    .modal-bd{padding:14px;}
+    .grid2{grid-template-columns:1fr;}
+    .dtab-row button{font-size:10px;padding:7px 2px;}
+  }
+  @media (max-width:380px){
+    .cal-cell{min-height:34px;}
+    .cal-dot{display:none;}
+    .cal-cell.has-event::after{content:'';display:block;width:5px;height:5px;border-radius:50%;background:var(--accent);margin:1px auto 0;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div>
+      <h1>Career Map - 就活比較</h1>
+      <p>企業データ・志望度・ステータス・メモ・予定はすべてこのブラウザに保存され、あなただけの「就活マップ」になります。企業の追加・編集・削除も自由に行えます。</p>
+    </div>
+    <div class="hd-actions">
+      <button class="icon-btn" id="btnTheme" title="表示テーマを切り替え">🌙</button>
+      <button class="icon-btn" id="btnSettings" title="設定">⚙</button>
+    </div>
+  </div>
+  <div class="wrap" style="position:relative;">
+    <div class="settings-menu" id="settingsMenu">
+      <button id="btnExport">📤 データをエクスポート(JSON)</button>
+      <button id="btnImport">📥 データをインポート(JSON)</button>
+      <button id="btnReset">🔄 初期データにリセット</button>
+    </div>
+  </div>
+  <div class="wrap">
+    <nav class="tabs" id="mainTabs">
+      <button data-tab="list" class="active">🏢 企業一覧</button>
+      <button data-tab="calendar">📅 カレンダー</button>
+      <button data-tab="profile">📝 自己分析ノート</button>
+    </nav>
+    <div class="summary" id="summary"></div>
+    <div id="backupBox"></div>
+    <div id="deadlineBox"></div>
+  </div>
+</header>
+
+<div class="wrap" id="listPage">
+  <div class="controls">
+    <input type="text" id="search" placeholder="企業名・キーワードで検索">
+    <select id="sort">
+      <option value="name">並び替え：企業名</option>
+      <option value="tier">志望度順</option>
+      <option value="dsfit_desc">スキル適性が高い順</option>
+      <option value="deadline">締切・予定が近い順</option>
+      <option value="favorite">お気に入り優先</option>
+    </select>
+  </div>
+
+  <div class="chip-row" id="tier-filters"></div>
+  <div class="chip-row" id="industry-filters"></div>
+
+  <div class="view-row">
+    <div class="seg" id="viewSeg">
+      <button data-view="list" class="active">📋 一覧</button>
+      <button data-view="tier">🏆 志望度別</button>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-gray" id="btnCmpMode">⚖️ 比較モード</button>
+      <button class="btn btn-primary" id="btnAddCo">＋ 企業を追加</button>
+    </div>
+  </div>
+
+  <div class="count" id="result-count"></div>
+  <div id="statusFilterInfo"></div>
+  <div id="content"></div>
+</div>
+
+<div class="wrap" id="calPage" style="display:none;"></div>
+<div class="wrap" id="profilePage" style="display:none;"></div>
+
+<footer>企業データは公開情報を基にした参考値を含みます（要確認の項目あり）。編集・追加した内容はこのブラウザにのみ保存されます。</footer>
+
+<div class="overlay" id="overlay"></div>
+<div class="cmp-bar" id="cmpBar" style="display:none;">
+  <span id="cmpCount"></span>
+  <button class="btn btn-primary" id="btnOpenCompare">比較表を見る</button>
+  <button class="btn btn-gray" id="btnCancelCmp">キャンセル</button>
+</div>
+<input type="file" id="importFile" accept="application/json" style="display:none;">
+
+<script>
+'use strict';
+// ───────────────────────── 初期(中立)データ ─────────────────────────
+// tier は個人の志望度ランキングのため、初期状態はすべて未設定("")。
+// dsFit(0-5) は自分のスキル・専攻をどれだけ活かせそうかの目安（データサイエンスに限らず自分の専門性で読み替え可）。数値は公開情報を基にした参考値のため要確認のものを含む。
+// 初期サンプルとして3社のみ掲載（編集でどうせ書き換えるため、最小限にしてある）
+const SEED_COMPANIES = [
+{name:"三菱UFJ銀行",industryMajor:"金融",industrySub:"銀行",location:"東京都",mainBusiness:"銀行業（預金・融資・為替など）",tags:["メガバンク"]},
+{name:"ソフトバンク株式会社",industryMajor:"IT・メディア",industrySub:"通信",location:"東京都",mainBusiness:"携帯電話・通信サービス、法人IT事業",tags:["通信キャリア"]},
+{name:"トヨタ自動車株式会社",industryMajor:"自動車・機械",industrySub:"自動車",location:"愛知県豊田市",mainBusiness:"自動車の製造・販売",tags:["自動車","国内最大手"]},
+];
+// ───────────────────────── 定数 ─────────────────────────
+const TIER_ORDER = ['S','A','B','C','D','その他',''];
+const TIER_COLOR = {S:'var(--tierS)',A:'var(--tierA)',B:'var(--tierB)',C:'var(--tierC)',D:'var(--tierD)','その他':'var(--tierO)','':'var(--border)'};
+const STATUS_LIST = ['気になる','合同説明会参加','個別説明会参加','エントリー','夏インターン参加','秋インターン参加','冬インターン参加','早期選考中','本選考ES提出','本選考中','最終選考','内定','内定承諾','不合格','辞退'];
+const STATUS_COLOR = {
+  '気になる':'#f1f5f9|#475569',
+  '合同説明会参加':'#e0f2fe|#0369a1',
+  '個別説明会参加':'#dbeafe|#1d4ed8',
+  'エントリー':'#dbeafe|#1d4ed8',
+  '夏インターン参加':'#ede9fe|#7c3aed',
+  '秋インターン参加':'#f3e8ff|#7e22ce',
+  '冬インターン参加':'#fae8ff|#a21caf',
+  '早期選考中':'#fef9c3|#a16207',
+  '本選考ES提出':'#fde68a|#92400e',
+  '本選考中':'#ffedd5|#c2410c',
+  '最終選考':'#fee2e2|#b91c1c',
+  '内定':'#dcfce7|#15803d',
+  '内定承諾':'#bbf7d0|#166534',
+  '不合格':'#e5e7eb|#4b5563',
+  '辞退':'#f3f4f6|#6b7280',
+};
+const EVENT_TYPES = ['合同説明会','個別説明会','仕事体験','インターン','ES締切','一次面接','二次面接','最終面接','OB・OG訪問','結果通知','その他'];
+const ES_PHASES = ['夏インターン','秋インターン','冬インターン','早期選考','本選考','その他'];
+const ES_PHASE_COLOR = {
+  '夏インターン':'#fef3c7|#92400e', '秋インターン':'#fde68a|#78350f', '冬インターン':'#dbeafe|#1e40af',
+  '早期選考':'#dcfce7|#166534', '本選考':'#fee2e2|#991b1b', 'その他':'#e5e7eb|#4b5563',
+};
+function esPhaseColor(p){ return (ES_PHASE_COLOR[p]||'#e5e7eb|#4b5563').split('|'); }
+// イベント種類ごとの色分け（背景色|文字色）。カレンダー表示・イベントタグ表示に使用。
+const EVENT_TYPE_COLOR = {
+  '合同説明会':'#e0f2fe|#0369a1',
+  '個別説明会':'#dbeafe|#1d4ed8',
+  '仕事体験':'#ecfccb|#4d7c0f',
+  'インターン':'#d1fae5|#047857',
+  'ES締切':'#fee2e2|#b91c1c',
+  '一次面接':'#fef3c7|#b45309',
+  '二次面接':'#fde68a|#92400e',
+  '最終面接':'#fecaca|#991b1b',
+  'OB・OG訪問':'#ede9fe|#6d28d9',
+  '結果通知':'#fce7f3|#be185d',
+  'その他':'#e5e7eb|#4b5563',
+};
+function evTypeColor(type){ return (EVENT_TYPE_COLOR[type]||'#e5e7eb|#4b5563').split('|'); }
+// ───────────────────────── AI一括入力 ─────────────────────────
+function buildAiPrompt(name){
+  const co = name && name.trim() ? name.trim() : '〇〇株式会社（ここを実際に調べたい企業名に書き換えてください）';
+  return `就活生向けの企業比較のために、次の企業について調べて、JSON形式のみで回答してください（JSON以外の文章や説明は一切含めないでください）。分からない項目は文字列なら空文字""、数値なら0にしてください。まず企業の公式サイト・採用ページ・IR情報を優先して確認し、そこに載っていない項目は就職四季報やニュース記事など他の信頼できる情報源で補ってください。それでも分からない場合は、不確かな推測を書かず空欄にしてください。
+
+企業名: ${co}
+
+出力するJSON（キー名はそのまま。値だけ埋めてください）:
+{
+"industryMajor": "次のいずれか1つ: 金融/IT・メディア/自動車・機械/小売・卸/サービス/建設・不動産/物流・運送/資源・素材/電機・精密/食品/生活関連/飲食/娯楽・レジャー/その他",
+"industrySub": "業界の詳細分類（自由記述）",
+"location": "本社所在地",
+"salaryBase": "初任給の基本給（例: 22万円）",
+"salaryAllowance": "初任給の諸手当額（例: 1.5万円）",
+"salaryTotal": "初任給の合計額（例: 23.5万円）",
+"avgSalary": "平均年収（例: 650万円）",
+"overtime": "月平均残業時間（例: 20時間）",
+"paidLeaveRate": "有給取得率（例: 70%）",
+"annualHolidays": "年間休日数（例: 120日）",
+"avgTenure": "平均勤続年数（例: 12.5年）",
+"turnoverRate": "離職率の目安（例: 3年以内離職率10%）",
+"transfer": "転勤の有無・範囲（例: あり(全国転勤)／なし／エリア限定 など）",
+"remote": "リモートワーク制度の概要",
+"employeeCount": "従業員数（例: 単体3,200名／連結15,000名）",
+"mainBusiness": "事業内容（100字程度）",
+"strengths": "就活生から見た強み・魅力（100字程度）",
+"weaknesses": "就活生から見た懸念点・注意点（100字程度）",
+"url": "採用ページのURL",
+"tags": ["キーワードタグを2〜4個の配列"],
+"dsFit": "自分の専攻・スキル・強みをどれだけ活かせそうかの目安を0〜5の整数で（データサイエンス/ITに限らず、応募者の専門性全般の観点で）"
+}`;
+}
+const AI_FILL_KEYS = ['industryMajor','industrySub','location','salaryBase','salaryAllowance','salaryTotal','avgSalary','overtime','paidLeaveRate','annualHolidays','avgTenure','turnoverRate','transfer','remote','employeeCount','mainBusiness','strengths','weaknesses','url','tags','dsFit'];
+function parseAiJson(raw){
+  let s = raw.trim();
+  const fence = s.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if(fence) s = fence[1].trim();
+  const start = s.indexOf('{'), end = s.lastIndexOf('}');
+  if(start!==-1 && end!==-1 && end>start) s = s.slice(start, end+1);
+  return JSON.parse(s);
+}
+function applyAiFillToDraft(json){
+  AI_FILL_KEYS.forEach(k=>{
+    if(json[k]===undefined || json[k]===null) return;
+    if(k==='tags'){
+      let t = json.tags;
+      if(typeof t==='string') t = t.split(/[,、]/).map(x=>x.trim()).filter(Boolean);
+      if(Array.isArray(t)) editDraft.tags = t.map(String);
+    } else if(k==='dsFit'){
+      const n = Number(json.dsFit);
+      if(!Number.isNaN(n)) editDraft.dsFit = Math.max(0, Math.min(5, Math.round(n)));
+    } else {
+      editDraft[k] = String(json[k]);
+    }
+  });
+  if(!editDraft.tags.includes('AI入力(要確認)')) editDraft.tags = [...editDraft.tags, 'AI入力(要確認)'];
+}
+// 業界の大分類（固定候補。詳細分類はここから選ぶと候補が絞り込まれる）
+const INDUSTRY_MAJOR_LIST = ['金融','IT・メディア','自動車・機械','小売・卸','サービス','建設・不動産','物流・運送','資源・素材','電機・精密','食品','生活関連','飲食','娯楽・レジャー','その他'];
+// 業界の詳細分類（大分類ごとの候補。ここにない項目は自由入力で追加できる）
+const INDUSTRY_SUB_MAP = {
+  '金融': ['銀行','地方銀行','信用金庫','証券','ネット証券','暗号資産','キャッシュレス','商品先物','生命保険','損害保険','消費者金融','クレジットカード','リース','家賃保証'],
+  '建設・不動産': ['建設','不動産','マンション','マンション管理','住宅','住宅設備','建材','リフォーム','シャッター','電気通信工事','土木','建設コンサル','ビル管理','高速道路','駐車場'],
+  '物流・運送': ['運送','航空','空港','鉄道','バス','タクシー','海運','倉庫・運輸'],
+  'IT・メディア': ['通信','IT','AI','SaaS','ブロックチェーン','ソフトウェア','データセンター','インターネット','EC','モバイル','IoT','携帯電話','携帯電話販売','ネット広告','テレビ','広告','出版','新聞','印刷'],
+  '資源・素材': ['石油','電力','ガス','化学','産業ガス','塗料','香料','繊維','鉄鋼','電炉','特殊鋼','非鉄金属','アルミ','製缶','電線','金属製品','産業廃棄物','ガラス','セメント','製紙','段ボール','ゴム・タイヤ'],
+  '自動車・機械': ['自動車','自動車部品','トラック','二輪車・バイク','中古車','機械','造船重機','プラント','水処理','鉄道車両','建設機械','建機レンタル','工作機械','工具','ベアリング','ロボット','農業機械','厨房機器','パチンコ(製造)'],
+  '電機・精密': ['家電','電気機器','重電','空調','エレベーター','電子部品','FA','モーター','コネクタ','精密機器','医療機器','リチウム電池','カメラ','時計','OA機器','半導体','半導体製造装置','半導体材料'],
+  '食品': ['食品','食肉','冷凍食品','即席麺','パン','調味料','製粉','製油','製糖','菓子','乳製品','ビール','飲料','水産','農業','種苗','飼料'],
+  '小売・卸': ['小売','卸売','総合商社','専門商社','半導体商社','食品卸','医薬品卸','水産卸','百貨店','スーパー','コンビニ','ドラッグストア','調剤薬局','家電量販店','ホームセンター','ディスカウント','SC','100円ショップ','書店','スポーツ用品店','リサイクル','カー用品店'],
+  '生活関連': ['トイレタリー','殺虫剤','ペット','製薬','農薬','インテリア','雑貨','通販','文具','オフィス家具','アウトドア用品','スポーツ用品','化粧品','アパレル','紳士服','着物','靴','メガネ','コンタクトレンズ','ジュエリー'],
+  'サービス': ['サービス','人材派遣','技術者派遣','教育','保育','介護','介護用品','警備','冠婚葬祭','葬儀','ブライダル','エステ','コンサルティング','BPO','コールセンター','福利厚生'],
+  '飲食': ['飲食','カフェ','ファミレス','ファーストフード','牛丼','焼肉','寿司','居酒屋','ラーメン','うどん','中食'],
+  '娯楽・レジャー': ['旅行','ホテル','ビジネスホテル','レジャー施設','スポーツクラブ','ゴルフ場','カラオケ','映画','アニメ','音楽','楽器','玩具','ゲーム','eスポーツ','イベント'],
+};
+// 企業名フィールドの入力候補（自分の登録リストになくても、ここから選んだり自由入力したりできる）
+const COMPANY_NAME_CANDIDATES = ['三井住友銀行','みずほ銀行','東京海上日動火災保険','楽天グループ','NTTドコモ','KDDI','本田技研工業','日産自動車','パナソニック','日立製作所','三菱電機','セブン&アイ・ホールディングス','丸紅','三菱商事','積水ハウス','JR東日本','全日本空輸(ANA)','日本郵船','資生堂','キリンホールディングス','日本マクドナルド','JTB','任天堂'];
+
+// ───────────────────────── 永続化 ─────────────────────────
+const LS_KEY = 'career-map-companies-v2';
+const LS_SUB_KEY = 'career-map-custom-industry-subs-v1';
+function loadCustomSubs(){
+  try{ const raw = localStorage.getItem(LS_SUB_KEY); if(raw){ const d=JSON.parse(raw); if(d && typeof d==='object') return d; } }catch(e){}
+  return {};
+}
+function saveCustomSubs(obj){ try{ localStorage.setItem(LS_SUB_KEY, JSON.stringify(obj)); }catch(e){} }
+function subOptions(major){
+  const defaults = INDUSTRY_SUB_MAP[major] || [];
+  const custom = (loadCustomSubs()[major]) || [];
+  return [...defaults, ...custom.filter(s=>!defaults.includes(s))];
+}
+function registerSubIfNew(major, sub){
+  if(!major || !sub) return;
+  const combined = subOptions(major);
+  if(!combined.includes(sub)){
+    const map = loadCustomSubs();
+    map[major] = [...(map[major]||[]), sub];
+    saveCustomSubs(map);
+  }
+}
+function migrateCompany(c){
+  let out = c;
+  // 旧スキーム(startingSalary 単一文字列)から 基本給/手当額/合計額 の3項目へ移行
+  if(out.salaryTotal===undefined){
+    const {startingSalary, ...rest} = out;
+    out = {salaryBase:'', salaryAllowance:'', salaryTotal: startingSalary||'', ...rest};
+  }
+  // 旧スキーム(industry 単一文字列)から 大分類/詳細分類の2項目へ移行
+  if(out.industryMajor===undefined){
+    const {industry, ...rest} = out;
+    out = {industryMajor: industry?'その他':'', industrySub: industry||'', ...rest};
+  }
+  // esRecords に phase(季節/選考区分) フィールドを補完
+  if(Array.isArray(out.esRecords)){
+    out = {...out, esRecords: out.esRecords.map(r=>({phase:'', ...r}))};
+  }
+  return out;
+}
+function seedData(){
+  return SEED_COMPANIES.map((c,i)=>({
+    id: Date.now()+i, tier:'', status:[], memo:'', events:[],
+    salaryBase:'', salaryAllowance:'', salaryTotal:'',
+    avgSalary:'', overtime:'', paidLeaveRate:'', turnoverRate:'', remote:'',
+    strengths:'', weaknesses:'', url:'', dsFit:0, tags:[], favorite:false, esRecords:[],
+    annualHolidays:'', avgTenure:'', transfer:'', employeeCount:'',
+    ...c
+  }));
+}
+function loadCompanies(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){ const d = JSON.parse(raw); if(Array.isArray(d) && d.length) return d.map(migrateCompany); }
+  }catch(e){}
+  const seeded = seedData();
+  saveCompanies(seeded);
+  return seeded;
+}
+function saveCompanies(list){
+  companies = list;
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(list)); }catch(e){}
+}
+let companies = [];
+companies = loadCompanies();
+
+// ───────────────────────── 状態 ─────────────────────────
+let state = { search:"", tier:null, industry:null, sort:"name", view:"list", tab:"list", deadlineWindow:30, statusFilter:null, noteCategory:null };
+let cmpMode = false;
+let cmpSel = [];
+let detailId = null;
+let editMode = false;
+let editDraft = null;
+let calDate = new Date();
+let calSel = null;
+
+// ───────────────────────── ヘルパー ─────────────────────────
+const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+// "example.com" のようにスキームなしで入力されたURLでもリンクが正しく開けるよう、保存時・表示時の両方でhttps://を補う
+function normalizeUrl(u){ const t=String(u==null?'':u).trim(); if(!t) return ''; return /^https?:\/\//i.test(t) ? t : `https://${t}`; }
+const today = () => new Date().toISOString().slice(0,10);
+const uid = () => Date.now()+Math.floor(Math.random()*1000);
+function fitDots(fit){ let out=''; for(let i=1;i<=5;i++) out+=`<span class="fit-dot${i<=(fit||0)?' on':''}"></span>`; return out; }
+function tierBadge(t){ return t ? `<span class="tier" style="background:${TIER_COLOR[t]||'#ccc'}">志望度 ${t}</span>` : `<span class="tier unset">未設定</span>`; }
+function industryLabel(c){ return (c.industryMajor||'—') + (c.industrySub? ' ・ '+c.industrySub : ''); }
+function evEnd(ev){ return ev.endDate && ev.endDate>=ev.date ? ev.endDate : ev.date; }
+function fmtEv(ev){ let s=ev.date; if(ev.endDate&&ev.endDate!==ev.date) s+=`〜${ev.endDate}`; if(ev.time) s+=` ${ev.time}`; return s; }
+const revealedPw = new Set(); // カード上でPWを表示中の企業ID（セッション内のみ・再読み込みで初期化）
+function buildMypageInline(c){
+  const has = c.mypageUrl || c.mypageId || c.mypagePassword;
+  if(!has){
+    return `<div class="mypage-inline"><span class="mypage-inline-label">🔑 マイページ</span><span class="mypage-inline-empty">未設定</span></div>`;
+  }
+  const shown = revealedPw.has(c.id);
+  return `<div class="mypage-inline" data-mypagerow="${c.id}">
+    ${c.mypageUrl?`<a class="btn btn-primary btn-sm mypage-inline-open" href="${esc(normalizeUrl(c.mypageUrl))}" target="_blank" rel="noopener">🔑 マイページを開く</a>`:`<span class="mypage-inline-label">🔑 マイページ</span>`}
+    ${c.mypageId?`<span class="mypage-inline-val">ID: ${esc(c.mypageId)}</span>`:''}
+    ${c.mypagePassword?`<span class="mypage-inline-val mypage-inline-pw">PW: ${shown?esc(c.mypagePassword):'••••••'}</span><button type="button" data-toggleinlinepw="${c.id}" title="${shown?'隠す':'表示'}">${shown?'🙈':'👁'}</button>`:''}
+  </div>`;
+}
+
+// ───────────────────────── バックアップ（エクスポート）リマインド ─────────────────────────
+// localStorageのみで完結する構成上、端末故障やブラウザデータ消去でデータが失われるリスクがあるため、
+// 一定期間エクスポートしていない場合に軽く思い出させる。
+const LS_LASTEXPORT_KEY = 'career-map-last-export-v1';
+function getLastExportAt(){ try{ const v = localStorage.getItem(LS_LASTEXPORT_KEY); return v ? Number(v) : null; }catch(e){ return null; } }
+function setLastExportNow(){ try{ localStorage.setItem(LS_LASTEXPORT_KEY, String(Date.now())); }catch(e){} }
+function daysSinceTs(ts){ return Math.floor((Date.now()-ts)/86400000); }
+const BACKUP_REMIND_DAYS = 14;
+function renderBackupReminder(){
+  const box = document.getElementById('backupBox');
+  if(!box) return;
+  if(!companies.length){ box.innerHTML=''; return; }
+  const last = getLastExportAt();
+  const days = last==null ? null : daysSinceTs(last);
+  const overdue = days===null || days>=BACKUP_REMIND_DAYS;
+  if(!overdue){ box.innerHTML=''; return; }
+  const msg = days===null
+    ? 'まだ一度もバックアップ（JSONエクスポート）を行っていません。'
+    : `最後にバックアップしてから${days}日経過しています。`;
+  box.innerHTML = `<div class="backup-box">
+    <span>💾 ${msg} 端末の故障やブラウザのデータ消去に備えて、データをエクスポートしておくことをおすすめします。</span>
+    <button class="btn btn-primary btn-sm" id="btnBackupNow">今すぐエクスポート</button>
+  </div>`;
+  const btn = document.getElementById('btnBackupNow');
+  if(btn) btn.addEventListener('click', ()=>{ const real = document.getElementById('btnExport'); if(real) real.click(); });
+}
+
+// ───────────────────────── サマリー / 締切 ─────────────────────────
+function renderSummary(){
+  const box = document.getElementById('summary');
+  const counts = {}; const names = {}; STATUS_LIST.forEach(s=>{ counts[s]=0; names[s]=[]; });
+  companies.forEach(c=>(c.status||[]).forEach(s=>{ if(counts[s]!=null){ counts[s]++; names[s].push(c.name); } }));
+  box.innerHTML = `<div class="sum-pill"><b>${companies.length}</b>登録企業</div>` +
+    STATUS_LIST.map(s=>{
+      const tip = counts[s]>0 ? names[s].join('、') : '該当する企業はありません';
+      return `<div class="sum-pill sum-pill-clickable ${state.statusFilter===s?'on':''}" data-statusfilter="${esc(s)}" title="${esc(tip)}"><b>${counts[s]}</b>${esc(s)}</div>`;
+    }).join('');
+  box.querySelectorAll('[data-statusfilter]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const s = el.dataset.statusfilter;
+      state.statusFilter = state.statusFilter===s ? null : s;
+      state.tab = 'list';
+      document.getElementById('mainTabs').querySelectorAll('button').forEach(b=>b.classList.toggle('active', b.dataset.tab==='list'));
+      document.getElementById('listPage').style.display = 'block';
+      document.getElementById('calPage').style.display = 'none';
+      document.getElementById('profilePage').style.display = 'none';
+      document.getElementById('deadlineBox').style.display = 'none';
+      renderSummary(); renderFilters(); renderContent();
+    });
+  });
+}
+function renderDeadlines(){
+  const box = document.getElementById('deadlineBox');
+  const tod = today();
+  const win = state.deadlineWindow || 30;
+  const inX = new Date(); inX.setDate(inX.getDate()+win);
+  const inXs = inX.toISOString().slice(0,10);
+  const items = [];
+  companies.forEach(c=>(c.events||[]).forEach(ev=>{
+    if(evEnd(ev) >= tod && ev.date <= inXs) items.push({...ev, coId:c.id, coName:c.name});
+  }));
+  items.sort((a,b)=>a.date.localeCompare(b.date));
+  const segHtml = `<div class="seg" style="flex-shrink:0;">
+      <button data-dlwin="7" class="${win===7?'active':''}">7日</button>
+      <button data-dlwin="30" class="${win===30?'active':''}">30日</button>
+    </div>`;
+  box.innerHTML = `<div class="deadline-box" style="${items.length===0?'background:var(--card);border-color:var(--border);':''}">
+    <div class="dl-title" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;${items.length===0?'color:var(--sub);':''}"><span>⚠️ 直近${win}日以内の予定${items.length?`（${items.length}件）`:''}</span>${segHtml}</div>
+    ${items.length===0?'<p class="note" style="margin:0;">該当する予定はありません</p>':items.map(it=>{ const col=evTypeColor(it.type); return `<div class="dl-row" data-gotocard="${it.coId}"><span class="dl-date">${esc(it.date)}</span><span class="tag" style="background:${col[0]};color:${col[1]}">${esc(it.type)}</span><span style="font-weight:600">${esc(it.coName)}</span></div>`; }).join('')}
+  </div>`;
+  box.querySelectorAll('[data-gotocard]').forEach(el=>el.addEventListener('click',()=>openDetail(Number(el.dataset.gotocard))));
+  box.querySelectorAll('[data-dlwin]').forEach(el=>el.addEventListener('click',()=>{ state.deadlineWindow = Number(el.dataset.dlwin); renderDeadlines(); }));
+}
+
+// ───────────────────────── フィルタ / 一覧描画 ─────────────────────────
+function renderFilters(){
+  const tierBox = document.getElementById('tier-filters');
+  tierBox.innerHTML = '<span class="chip'+(state.tier===null?' active':'')+'" data-tier="all">全ての志望度</span>' +
+    ['S','A','B','C','D','その他'].map(t=>`<span class="chip${state.tier===t?' active':''}" data-tier="${t}">志望度 ${t}</span>`).join('') +
+    `<span class="chip${state.tier==='__unset'?' active':''}" data-tier="__unset">未設定</span>`;
+  const indBox = document.getElementById('industry-filters');
+  indBox.innerHTML = '<span class="chip'+(state.industry===null?' active':'')+'" data-ind="all">全業界</span>' +
+    INDUSTRY_MAJOR_LIST.map(i=>`<span class="chip${state.industry===i?' active':''}" data-ind="${esc(i)}">${esc(i)}</span>`).join('');
+  tierBox.querySelectorAll('.chip').forEach(el=>el.addEventListener('click',()=>{
+    state.tier = el.dataset.tier==='all'?null:el.dataset.tier; renderFilters(); renderContent();
+  }));
+  indBox.querySelectorAll('.chip').forEach(el=>el.addEventListener('click',()=>{
+    state.industry = el.dataset.ind==='all'?null:el.dataset.ind; renderFilters(); renderContent();
+  }));
+}
+function applyFilters(){
+  let list = companies.filter(c=>{
+    if(state.tier==='__unset' && c.tier) return false;
+    if(state.tier && state.tier!=='__unset' && c.tier!==state.tier) return false;
+    if(state.industry!==null && c.industryMajor!==state.industry) return false;
+    if(state.statusFilter && !(c.status||[]).includes(state.statusFilter)) return false;
+    if(state.search){
+      const q = state.search.toLowerCase();
+      const hay = (c.name+(c.industryMajor||'')+(c.industrySub||'')+(c.tags||[]).join(' ')+(c.mainBusiness||'')+(c.strengths||'')).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  if(state.sort==='tier') list.sort((a,b)=>TIER_ORDER.indexOf(a.tier||'')-TIER_ORDER.indexOf(b.tier||'')||a.name.localeCompare(b.name,'ja'));
+  else if(state.sort==='dsfit_desc') list.sort((a,b)=>(b.dsFit||0)-(a.dsFit||0));
+  else if(state.sort==='favorite') list.sort((a,b)=>(b.favorite?1:0)-(a.favorite?1:0)||a.name.localeCompare(b.name,'ja'));
+  else if(state.sort==='deadline'){
+    const tod = today();
+    const nextDate = c => {
+      const upcoming = (c.events||[]).map(evEnd).filter(d=>d>=tod).sort();
+      return upcoming[0] || '9999-99-99';
+    };
+    list.sort((a,b)=>nextDate(a).localeCompare(nextDate(b))||a.name.localeCompare(b.name,'ja'));
+  }
+  else list.sort((a,b)=>a.name.localeCompare(b.name,'ja'));
+  return list;
+}
+function renderContent(){
+  const list = applyFilters();
+  document.getElementById('result-count').textContent = `${list.length} 件 / 全 ${companies.length} 件`;
+  const filterInfo = document.getElementById('statusFilterInfo');
+  if(state.statusFilter){
+    filterInfo.innerHTML = `<div class="status-filter-info">ステータス「${esc(state.statusFilter)}」で絞り込み中 <button id="btnClearStatusFilter">✕ 解除</button></div>`;
+    const btn = document.getElementById('btnClearStatusFilter');
+    if(btn) btn.addEventListener('click', ()=>{ state.statusFilter=null; renderSummary(); renderContent(); });
+  } else filterInfo.innerHTML = '';
+  const box = document.getElementById('content');
+  if(list.length===0){ box.innerHTML = '<div class="empty">条件に合う企業がありません。右上の「＋ 企業を追加」から登録できます。</div>'; return; }
+  box.innerHTML = state.view==='tier' ? renderTierBoard(list) : renderGrid(list);
+  bindContentEvents();
+  renderCmpBar();
+}
+function renderGrid(list){
+  return `<div class="grid">${list.map(c=>{
+    const mainSt = (c.status||[])[0];
+    const stColor = mainSt ? (STATUS_COLOR[mainSt]||'#eee|#666').split('|') : null;
+    return `<div class="card" data-open="${c.id}">
+      ${cmpMode?`<div class="compare-check ${cmpSel.includes(c.id)?'on':''}" data-cmpchk="${c.id}">${cmpSel.includes(c.id)?'✓':''}</div>`:''}
+      <div class="card-top">
+        <div class="card-name-row">
+          <button class="fav-star ${c.favorite?'on':''}" data-fav="${c.id}" title="お気に入り">${c.favorite?'★':'☆'}</button>
+          <h2>${esc(c.name)}</h2>
+        </div>
+        ${tierBadge(c.tier)}
+      </div>
+      <div class="industry">${esc(industryLabel(c))} ・ ${esc(c.location||'')}</div>
+      <div class="metrics">
+        <div><span class="metric-label">初任給(合計)</span><br><span class="metric-val">${esc(c.salaryTotal||'—')}</span></div>
+        <div><span class="metric-label">平均年収</span><br><span class="metric-val">${esc(c.avgSalary||'—')}</span></div>
+        <div><span class="metric-label">残業</span><br><span class="metric-val">${esc(c.overtime||'—')}</span></div>
+        <div><span class="metric-label">スキル適性</span><br><span class="fit">${fitDots(c.dsFit)}</span></div>
+      </div>
+      <div class="tags">${(c.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
+      ${mainSt?`<span class="my-status" style="background:${stColor[0]};color:${stColor[1]}">${esc(mainSt)}${(c.status||[]).length>1?` +${c.status.length-1}`:''}</span>`:''}
+      ${buildMypageInline(c)}
+    </div>`;
+  }).join('')}</div>`;
+}
+function renderTierBoard(list){
+  return `<div style="margin-top:10px">${['S','A','B','C','D','その他',''].map(t=>{
+    const cs = list.filter(c=>(c.tier||'')===t);
+    return `<div class="tier-row">
+      <div class="tier-lbl" style="background:${TIER_COLOR[t]}">${t||'未'}</div>
+      <div class="tier-lane">${cs.length===0?'<span class="tier-empty">該当企業なし</span>':cs.map(c=>`<button class="tier-chip" data-open="${c.id}">${esc(c.name)}</button>`).join('')}</div>
+    </div>`;
+  }).join('')}</div>`;
+}
+function bindContentEvents(){
+  document.querySelectorAll('[data-open]').forEach(el=>{
+    el.addEventListener('click', e=>{
+      if(e.target.closest('[data-cmpchk]')) return;
+      const id = Number(el.dataset.open);
+      if(cmpMode){ toggleCmp(id); return; }
+      openDetail(id);
+    });
+  });
+  document.querySelectorAll('[data-cmpchk]').forEach(el=>{
+    el.addEventListener('click', e=>{ e.stopPropagation(); toggleCmp(Number(el.dataset.cmpchk)); });
+  });
+  document.querySelectorAll('[data-mypagerow]').forEach(el=>{
+    el.addEventListener('click', e=>{ e.stopPropagation(); });
+  });
+  document.querySelectorAll('[data-toggleinlinepw]').forEach(el=>{
+    el.addEventListener('click', e=>{
+      e.stopPropagation();
+      const id = Number(el.dataset.toggleinlinepw);
+      if(revealedPw.has(id)) revealedPw.delete(id); else revealedPw.add(id);
+      renderContent();
+    });
+  });
+  document.querySelectorAll('[data-fav]').forEach(el=>{
+    el.addEventListener('click', e=>{
+      e.stopPropagation();
+      const id = Number(el.dataset.fav);
+      saveCompanies(companies.map(x=>x.id===id?{...x, favorite:!x.favorite}:x));
+      renderContent();
+    });
+  });
+}
+function toggleCmp(id){
+  if(cmpSel.includes(id)) cmpSel = cmpSel.filter(x=>x!==id);
+  else if(cmpSel.length<5) cmpSel.push(id);
+  renderContent();
+}
+function renderCmpBar(){
+  const bar = document.getElementById('cmpBar');
+  if(cmpMode && cmpSel.length>0){ bar.style.display='flex'; document.getElementById('cmpCount').textContent = `${cmpSel.length}社選択中（最大5社）`; }
+  else bar.style.display='none';
+}
+
+// ───────────────────────── 詳細/編集モーダル ─────────────────────────
+let detailTab = 'overview';
+let esEditingId = null;
+function openDetail(id){ detailId=id; editMode=false; editDraft=null; detailTab='overview'; esEditingId=null; renderOverlay(); }
+function openAddCompany(){
+  detailId = null; editMode = true;
+  editDraft = {id:uid(), name:'', industryMajor:'', industrySub:'', location:'', salaryBase:'', salaryAllowance:'', salaryTotal:'', avgSalary:'', overtime:'', paidLeaveRate:'', annualHolidays:'', avgTenure:'', turnoverRate:'', transfer:'', remote:'', employeeCount:'', mainBusiness:'', strengths:'', weaknesses:'', url:'', tags:[], dsFit:0, tier:'', status:[], memo:'', events:[], favorite:false, esRecords:[]};
+  renderOverlay();
+}
+function closeOverlay(){ detailId=null; editMode=false; editDraft=null; document.getElementById('overlay').style.display='none'; document.getElementById('overlay').innerHTML=''; }
+function currentCompany(){ return editDraft || companies.find(c=>c.id===detailId); }
+
+function renderOverlay(){
+  const overlay = document.getElementById('overlay');
+  const c = currentCompany();
+  if(!c){ overlay.style.display='none'; overlay.innerHTML=''; return; }
+  overlay.innerHTML = editMode ? buildEditModal(c) : buildDetailModal(c);
+  overlay.style.display='flex';
+  bindOverlayEvents(c);
+}
+// confirm()を使うとダイアログの多用でブラウザに抑制され反応しなくなることがあるため、
+// ボタンを2回クリックすることで確定する「アーム式」の削除パターンを使う（ネイティブダイアログ不使用）。
+function armDeleteButton(btn, label, onConfirm){
+  if(btn.dataset.armed==='1'){
+    onConfirm();
+    return;
+  }
+  btn.dataset.armed = '1';
+  btn.dataset.origText = btn.textContent;
+  btn.textContent = label || 'もう一度押すと削除';
+  btn.classList.add('btn-armed');
+  if(btn._armTimeout) clearTimeout(btn._armTimeout);
+  btn._armTimeout = setTimeout(()=>{
+    btn.dataset.armed = '0';
+    btn.textContent = btn.dataset.origText;
+    btn.classList.remove('btn-armed');
+  }, 4000);
+}
+function buildDetailModal(c){
+  const tod = today();
+  const events = [...(c.events||[])].sort((a,b)=>a.date.localeCompare(b.date));
+  const esRecords = c.esRecords||[];
+  const tabs = [
+    {key:'overview', label:'📋 概要'},
+    {key:'mystatus', label:'⭐ ステータス'},
+    {key:'events', label:`📅 予定${events.length?`(${events.length})`:''}`},
+    {key:'es', label:`📝 ES対策${esRecords.length?`(${esRecords.length})`:''}`},
+  ];
+  const tabBarHtml = `<div class="seg dtab-row">${tabs.map(t=>`<button data-dtab="${t.key}" class="${detailTab===t.key?'active':''}">${t.label}</button>`).join('')}</div>`;
+
+  const overviewHtml = `
+        <div class="detail-grid">
+          <div class="k">業界(大分類)</div><div class="v">${esc(c.industryMajor||'—')}</div>
+          <div class="k">業界(詳細)</div><div class="v">${esc(c.industrySub||'—')}</div>
+          <div class="k">勤務地</div><div class="v">${esc(c.location||'—')}</div>
+          <div class="k">初任給・基本給</div><div class="v">${esc(c.salaryBase||'—')}</div>
+          <div class="k">初任給・手当額</div><div class="v">${esc(c.salaryAllowance||'—')}</div>
+          <div class="k">初任給・合計額</div><div class="v">${esc(c.salaryTotal||'—')}</div>
+          <div class="k">平均年収</div><div class="v">${esc(c.avgSalary||'—')}</div>
+          <div class="k">月残業</div><div class="v">${esc(c.overtime||'—')}</div>
+          <div class="k">有給取得率</div><div class="v">${esc(c.paidLeaveRate||'—')}</div>
+          <div class="k">年間休日</div><div class="v">${esc(c.annualHolidays||'—')}</div>
+          <div class="k">平均勤続年数</div><div class="v">${esc(c.avgTenure||'—')}</div>
+          <div class="k">離職率</div><div class="v">${esc(c.turnoverRate||'—')}</div>
+          <div class="k">転勤の有無</div><div class="v">${esc(c.transfer||'—')}</div>
+          <div class="k">リモート</div><div class="v">${esc(c.remote||'—')}</div>
+          <div class="k">従業員数</div><div class="v">${esc(c.employeeCount||'—')}</div>
+        </div>
+        <div class="detail-sec"><h3>事業内容</h3><p>${esc(c.mainBusiness||'—')}</p></div>
+        <div class="detail-sec"><h3>強み</h3><p>${esc(c.strengths||'—')}</p></div>
+        <div class="detail-sec"><h3>懸念点</h3><p>${esc(c.weaknesses||'—')}</p></div>
+        ${c.url?`<div class="detail-sec"><a href="${esc(normalizeUrl(c.url))}" target="_blank" rel="noopener">採用ページを見る →</a></div>`:''}
+  `;
+
+  const mystatusHtml = `
+        ${(c.mypageUrl||c.mypageId||c.mypagePassword)?`
+        <div class="detail-sec">
+          <h3>マイページ</h3>
+          <div class="mypage-box">
+            ${c.mypageId?`<div class="mypage-row"><span class="mypage-k">ID</span><span class="mypage-v">${esc(c.mypageId)}</span><button class="btn btn-gray btn-sm" data-copy="${esc(c.mypageId)}">コピー</button></div>`:''}
+            ${c.mypagePassword?`<div class="mypage-row"><span class="mypage-k">PW</span><span class="mypage-v mypage-pw" data-pw="${esc(c.mypagePassword)}">••••••••</span><button class="btn btn-gray btn-sm" data-togglepw="1">表示</button><button class="btn btn-gray btn-sm" data-copy="${esc(c.mypagePassword)}">コピー</button></div>`:''}
+            ${c.mypageUrl?`<a class="btn btn-primary btn-sm" style="display:inline-block;margin-top:6px;text-decoration:none;" href="${esc(normalizeUrl(c.mypageUrl))}" target="_blank" rel="noopener">🔑 マイページを開く</a>`:''}
+          </div>
+        </div>`:`<div class="detail-sec"><h3>マイページ</h3><p class="note">未設定（編集画面から登録できます）</p></div>`}
+
+        <div class="detail-sec">
+          <h3>自分のステータス</h3>
+          <div class="status-pills">${STATUS_LIST.map(s=>`<button class="st-pill ${(c.status||[]).includes(s)?'on':''}" data-mystatus="${esc(s)}">${esc(s)}</button>`).join('')}</div>
+        </div>
+        <div class="detail-sec">
+          <h3>メモ</h3>
+          <textarea class="ta" rows="3" id="myMemo" placeholder="志望動機・気になる点など">${esc(c.memo||'')}</textarea>
+        </div>
+  `;
+
+  const eventsHtml = `
+        <div class="detail-sec" style="margin-top:0;">
+          <div id="evList">${events.length===0?'<p class="note">予定はまだありません</p>':events.map((ev,i)=>{
+            const past = evEnd(ev)<tod;
+            return `<div class="ev-card" style="${past?'opacity:.55':''}">
+              <div class="ev-card-hd">
+                <span class="tag" style="background:${evTypeColor(ev.type)[0]};color:${evTypeColor(ev.type)[1]}">${esc(ev.type)}</span>
+                <span style="font-variant-numeric:tabular-nums;font-weight:600">${esc(fmtEv(ev))}</span>
+                <button class="ev-del" data-delev="${i}">✕</button>
+              </div>
+              ${ev.memo?`<div class="ev-memo">${esc(ev.memo)}</div>`:''}
+            </div>`;
+          }).join('')}</div>
+          <div class="ev-add">
+            <div class="ev-add-row" id="evTypeRow">${EVENT_TYPES.map((t,i)=>`<button type="button" class="ev-type-btn ${i===0?'on':''}" data-evtype="${esc(t)}">${esc(t)}</button>`).join('')}</div>
+            <div class="ev-add-row">
+              <div style="display:flex;align-items:center;gap:4px;"><span class="note" style="margin:0;">開始</span><input type="date" id="evDate"></div>
+              <div style="display:flex;align-items:center;gap:4px;"><span class="note" style="margin:0;">終了(複数日の場合)</span><input type="date" id="evEndDate"></div>
+              <input type="time" id="evTime">
+            </div>
+            <p class="note" style="margin:2px 0 0;">💡 日付・時間欄はカレンダーを開かなくても、欄内をクリックして数字キーで直接入力できます（例: 09→15→2025の順にTabで移動）</p>
+            <textarea class="ta" id="evMemo" rows="2" placeholder="このイベントで聞いた話・感想など（複数行OK）" style="margin-top:0;"></textarea>
+            <div style="margin-top:8px;text-align:right;"><button class="btn btn-primary btn-sm" id="btnAddEv">追加</button></div>
+          </div>
+        </div>
+  `;
+
+  const editingRecord = esEditingId ? esRecords.find(r=>String(r.id)===String(esEditingId)) : null;
+  const esHtml = `
+        <div class="detail-sec" style="margin-top:0;">
+          <p class="note" style="margin:0 0 10px;">この企業のESで聞かれた設問や、面接で聞かれた質問と自分の回答を記録しておけます。自己PR・ガクチカなど使い回せる文章は「📝自己分析ノート」タブにまとめておくと、ここに貼り付けやすくなります。</p>
+          <div id="esList">${esRecords.length===0?'<p class="note">まだ記録がありません</p>':esRecords.map(r=>{
+            const col = r.type==='面接で聞かれた質問' ? ['#ede9fe','#6d28d9'] : ['#dbeafe','#1d4ed8'];
+            const pcol = esPhaseColor(r.phase);
+            return `<div class="ev-card">
+              <div class="ev-card-hd">
+                <span class="tag" style="background:${col[0]};color:${col[1]}">${esc(r.type||'ES設問')}</span>
+                ${r.phase?`<span class="tag" style="background:${pcol[0]};color:${pcol[1]}">${esc(r.phase)}</span>`:''}
+                <span class="note" style="margin:0;">${(r.answer||'').length}字</span>
+                <div style="margin-left:auto;display:flex;gap:6px;">
+                  <button class="btn btn-gray btn-sm" data-esedit="${r.id}">編集</button>
+                  <button class="btn btn-gray btn-sm" data-esdel="${r.id}">削除</button>
+                </div>
+              </div>
+              <div style="margin-top:8px;font-weight:700;font-size:13px;">Q. ${esc(r.question||'(質問未入力)')}</div>
+              <div style="margin-top:4px;font-size:13px;line-height:1.7;color:var(--text);white-space:pre-wrap;">A. ${esc(r.answer||'(回答未入力)')}</div>
+            </div>`;
+          }).join('')}</div>
+          <div class="ev-add">
+            ${editingRecord?'<p class="note" style="margin:0 0 6px;color:var(--accent);">記録を編集中です</p>':''}
+            <div class="ev-add-row" id="esTypeRow">
+              <button type="button" class="ev-type-btn ${(!editingRecord||editingRecord.type!=='面接で聞かれた質問')?'on':''}" data-estype="ES設問">ES設問</button>
+              <button type="button" class="ev-type-btn ${(editingRecord&&editingRecord.type==='面接で聞かれた質問')?'on':''}" data-estype="面接で聞かれた質問">面接で聞かれた質問</button>
+            </div>
+            <div class="field" style="margin-top:6px;">
+              <label class="lbl" style="font-weight:400;">いつの選考のES・質問か</label>
+              <select class="sel" id="esPhase">
+                <option value="">未選択</option>
+                ${ES_PHASES.map(p=>`<option value="${esc(p)}" ${editingRecord&&editingRecord.phase===p?'selected':''}>${esc(p)}</option>`).join('')}
+              </select>
+            </div>
+            <textarea class="ta" id="esQuestion" rows="2" placeholder="質問文（例: 学生時代に力を入れたことは？）">${esc(editingRecord?editingRecord.question:'')}</textarea>
+            <textarea class="ta" id="esAnswer" rows="5" placeholder="自分の回答" style="margin-top:6px;">${esc(editingRecord?editingRecord.answer:'')}</textarea>
+            <div class="note" id="esAnswerCount" style="text-align:right;margin-top:2px;">${(editingRecord?editingRecord.answer:'').length}字</div>
+            <div style="margin-top:8px;display:flex;justify-content:flex-end;gap:8px;">
+              ${editingRecord?'<button class="btn btn-gray btn-sm" id="btnCancelEsEdit">キャンセル</button>':''}
+              <button class="btn btn-primary btn-sm" id="btnAddEs">${editingRecord?'更新する':'追加'}</button>
+            </div>
+          </div>
+        </div>
+  `;
+
+  const bodyHtml = detailTab==='mystatus' ? mystatusHtml : detailTab==='events' ? eventsHtml : detailTab==='es' ? esHtml : overviewHtml;
+
+  return `
+    <div class="modal">
+      <div class="modal-hd">
+        <h2>${esc(c.name)} ${tierBadge(c.tier)}</h2>
+        <div style="display:flex;gap:6px;align-items:center;">
+          ${(detailTab==='events'||detailTab==='es')?'':'<button class="icon-btn" id="btnEdit" title="編集">✏️</button>'}
+          <button class="icon-btn" id="btnDeleteCo" title="削除" style="color:var(--danger)">🗑</button>
+          <button class="modal-x" id="closeDetail">&times;</button>
+        </div>
+      </div>
+      <div style="padding:10px 20px 0;flex-shrink:0;">${tabBarHtml}</div>
+      <div class="modal-bd">
+        ${bodyHtml}
+      </div>
+    </div>
+  `;
+}
+function buildEditModal(c){
+  const isNew = !companies.some(x=>x.id===c.id);
+  return `
+    <div class="modal wide">
+      <div class="modal-hd"><h2>${isNew?'企業を追加':esc(c.name)+' を編集'}</h2><button class="modal-x" id="closeEdit">&times;</button></div>
+      <div style="padding:10px 20px 0;flex-shrink:0;">
+        <div class="seg dtab-row" id="editTabRow">
+          <button type="button" data-edittab="overview" class="active">📋 概要</button>
+          <button type="button" data-edittab="status">⭐ ステータス</button>
+        </div>
+      </div>
+      <div class="modal-bd">
+        <div class="field"><label class="lbl">企業名 *（候補から選択、またはそのまま自由入力）</label>
+          <input class="inp" id="fName" list="companyNameList" value="${esc(c.name)}">
+          <datalist id="companyNameList">${[...new Set([...COMPANY_NAME_CANDIDATES, ...companies.map(x=>x.name)])].map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
+        </div>
+
+        <div data-edittabpage="overview">
+          <div class="field">
+            <button type="button" class="btn btn-gray" id="btnToggleAiFill">🤖 AIに調べてもらって一括入力</button>
+          </div>
+          <div id="aiFillBox" style="display:none;margin-bottom:16px;background:var(--bg);border-radius:10px;padding:12px;">
+            <p class="note" style="margin:0 0 8px;">① 下のプロンプトをコピーし、ChatGPTやClaudeなどに貼り付けて（企業名の部分を書き換えて）送信 → ② 返ってきたJSONをそのまま下の欄に貼り付けて「反映」を押してください。</p>
+            <textarea class="ta" id="aiPrompt" rows="6" readonly style="font-size:11.5px;font-family:monospace;">${esc(buildAiPrompt(c.name))}</textarea>
+            <div style="text-align:right;margin-top:4px;"><button type="button" class="btn btn-gray btn-sm" id="btnCopyAiPrompt">📋 プロンプトをコピー</button></div>
+            <label class="lbl" style="margin-top:10px;">AIの回答（JSON）を貼り付け</label>
+            <textarea class="ta" id="aiResponse" rows="6" placeholder='{"industryMajor": "...", ...}'></textarea>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;flex-wrap:wrap;gap:6px;">
+              <p class="note" style="margin:0;">⚠️ AIが調べた内容は実際と異なる場合があります。反映後は必ず採用ページ等の一次情報で確認してください。</p>
+              <button type="button" class="btn btn-primary btn-sm" id="btnApplyAiFill">反映する</button>
+            </div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label class="lbl">業界（大分類）</label>
+              <select class="sel" id="fIndustryMajor">
+                <option value="">未選択</option>
+                ${INDUSTRY_MAJOR_LIST.map(i=>`<option value="${esc(i)}" ${c.industryMajor===i?'selected':''}>${esc(i)}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field"><label class="lbl">業界（詳細・候補から選択、なければ自由入力で追加）</label>
+              <input class="inp" id="fIndustrySub" list="industrySubList" value="${esc(c.industrySub)}">
+              <datalist id="industrySubList">${subOptions(c.industryMajor).map(i=>`<option value="${esc(i)}">`).join('')}</datalist>
+            </div>
+          </div>
+          <div class="field"><label class="lbl">勤務地</label><input class="inp" id="fLocation" value="${esc(c.location)}"></div>
+          <div class="field">
+            <label class="lbl">初任給の内訳</label>
+            <div class="grid2" style="grid-template-columns:1fr 1fr 1fr;gap:8px;">
+              <div><label class="lbl" style="font-weight:400;">基本給</label><input class="inp" id="fSalaryBase" value="${esc(c.salaryBase)}" placeholder="例: 22万円"></div>
+              <div><label class="lbl" style="font-weight:400;">手当額</label><input class="inp" id="fSalaryAllowance" value="${esc(c.salaryAllowance)}" placeholder="例: 1.5万円"></div>
+              <div><label class="lbl" style="font-weight:400;">合計額</label><input class="inp" id="fSalaryTotal" value="${esc(c.salaryTotal)}" placeholder="例: 23.5万円"></div>
+            </div>
+            <p class="note">数値のみ入力されている場合、合計額が空欄なら自動計算します。</p>
+          </div>
+          <div class="grid2">
+            <div class="field"><label class="lbl">平均年収</label><input class="inp" id="fAvg" value="${esc(c.avgSalary)}"></div>
+            <div></div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label class="lbl">月残業</label><input class="inp" id="fOvertime" value="${esc(c.overtime)}"></div>
+            <div class="field"><label class="lbl">有給取得率</label><input class="inp" id="fPaid" value="${esc(c.paidLeaveRate)}"></div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label class="lbl">年間休日</label><input class="inp" id="fHolidays" value="${esc(c.annualHolidays)}" placeholder="例: 120日"></div>
+            <div class="field"><label class="lbl">平均勤続年数</label><input class="inp" id="fTenure" value="${esc(c.avgTenure)}" placeholder="例: 12.5年"></div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label class="lbl">離職率</label><input class="inp" id="fTurnover" value="${esc(c.turnoverRate)}"></div>
+            <div class="field"><label class="lbl">転勤の有無</label><input class="inp" id="fTransfer" value="${esc(c.transfer)}" placeholder="例: あり(全国)／なし"></div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label class="lbl">リモートワーク</label><input class="inp" id="fRemote" value="${esc(c.remote)}"></div>
+            <div class="field"><label class="lbl">従業員数</label><input class="inp" id="fEmployees" value="${esc(c.employeeCount)}" placeholder="例: 単体3,200名"></div>
+          </div>
+          <div class="field"><label class="lbl">スキル適性 (0〜5)</label><input class="inp" type="number" min="0" max="5" id="fDsFit" value="${c.dsFit||0}"><p class="note">自分の専攻・スキル・強みをどれだけ活かせそうかの目安（データサイエンス/ITに限らず、自分の専門性で読み替えてOK）</p></div>
+          <div class="field"><label class="lbl">タグ（カンマ区切り）</label><input class="inp" id="fTags" value="${esc((c.tags||[]).join(', '))}"></div>
+          <div class="field"><label class="lbl">事業内容</label><textarea class="ta" rows="2" id="fBiz">${esc(c.mainBusiness)}</textarea></div>
+          <div class="field"><label class="lbl">強み</label><textarea class="ta" rows="2" id="fStrengths">${esc(c.strengths)}</textarea></div>
+          <div class="field"><label class="lbl">懸念点</label><textarea class="ta" rows="2" id="fWeak">${esc(c.weaknesses)}</textarea></div>
+          <div class="field"><label class="lbl">採用ページURL</label><input class="inp" id="fUrl" value="${esc(c.url)}" placeholder="https://..."></div>
+        </div>
+
+        <div data-edittabpage="status" style="display:none;">
+          <div class="field"><label class="lbl">志望度</label>
+            <select class="sel" id="fTier"><option value="">未設定</option>${['S','A','B','C','D','その他'].map(t=>`<option ${c.tier===t?'selected':''}>${t}</option>`).join('')}</select>
+          </div>
+          <div class="field">
+            <label class="lbl">マイページ（応募者専用ページ）</label>
+            <div class="grid2" style="margin-bottom:8px;">
+              <input class="inp" id="fMypageUrl" value="${esc(c.mypageUrl)}" placeholder="マイページURL">
+              <input class="inp" id="fMypageId" value="${esc(c.mypageId)}" placeholder="ログインID">
+            </div>
+            <input class="inp" id="fMypagePassword" value="${esc(c.mypagePassword)}" placeholder="パスワード">
+            <p class="note">⚠️ このブラウザのlocalStorageに平文で保存されます。重要なパスワードの使い回しは避け、この企業専用のパスワードを設定することをおすすめします。</p>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" id="btnSaveCo">保存</button>
+          <button class="btn btn-gray" id="btnCancelEdit">キャンセル</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+function bindOverlayEvents(c){
+  const overlay = document.getElementById('overlay');
+  overlay.addEventListener('click', e=>{ if(e.target===overlay){ closeOverlay(); afterChange(); } });
+  overlay.querySelectorAll('[data-dtab]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ detailTab = btn.dataset.dtab; if(detailTab!=='es') esEditingId=null; renderOverlay(); });
+  });
+  // 編集モーダルの概要/ステータス タブ切替（入力中の内容が消えないよう再描画はせずDOM操作のみで切替）
+  overlay.querySelectorAll('[data-edittab]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const tab = btn.dataset.edittab;
+      overlay.querySelectorAll('[data-edittab]').forEach(b=>b.classList.toggle('active', b===btn));
+      overlay.querySelectorAll('[data-edittabpage]').forEach(p=>{ p.style.display = (p.dataset.edittabpage===tab) ? '' : 'none'; });
+    });
+  });
+  const close1 = overlay.querySelector('#closeDetail'); if(close1) close1.addEventListener('click', ()=>{ closeOverlay(); afterChange(); });
+  const close2 = overlay.querySelector('#closeEdit'); if(close2) close2.addEventListener('click', ()=>{ closeOverlay(); afterChange(); });
+  const cancelEdit = overlay.querySelector('#btnCancelEdit'); if(cancelEdit) cancelEdit.addEventListener('click', ()=>{ closeOverlay(); afterChange(); });
+
+  const btnEdit = overlay.querySelector('#btnEdit');
+  if(btnEdit) btnEdit.addEventListener('click', ()=>{ editDraft = JSON.parse(JSON.stringify(c)); editMode=true; renderOverlay(); });
+
+  const majorSel = overlay.querySelector('#fIndustryMajor');
+  if(majorSel){
+    majorSel.addEventListener('change', ()=>{
+      const subDatalist = overlay.querySelector('#industrySubList');
+      const subInput = overlay.querySelector('#fIndustrySub');
+      subDatalist.innerHTML = subOptions(majorSel.value).map(i=>`<option value="${esc(i)}">`).join('');
+      subInput.value = '';
+    });
+  }
+
+  const btnToggleAi = overlay.querySelector('#btnToggleAiFill');
+  if(btnToggleAi){
+    btnToggleAi.addEventListener('click', ()=>{
+      const box = overlay.querySelector('#aiFillBox');
+      const opening = box.style.display==='none';
+      box.style.display = opening ? 'block' : 'none';
+      if(opening){
+        const nameInput = overlay.querySelector('#fName');
+        overlay.querySelector('#aiPrompt').value = buildAiPrompt(nameInput?nameInput.value:c.name);
+      }
+    });
+  }
+  const btnCopyAiPrompt = overlay.querySelector('#btnCopyAiPrompt');
+  if(btnCopyAiPrompt){
+    btnCopyAiPrompt.addEventListener('click', ()=>{
+      const val = overlay.querySelector('#aiPrompt').value;
+      const done = ()=>{ const old=btnCopyAiPrompt.textContent; btnCopyAiPrompt.textContent='コピーしました'; setTimeout(()=>{btnCopyAiPrompt.textContent=old;},1200); };
+      if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(val).then(done).catch(()=>alert('コピーに失敗しました'));
+      else { const ta=overlay.querySelector('#aiPrompt'); ta.select(); try{document.execCommand('copy'); done();}catch(e){alert('コピーに失敗しました');} }
+    });
+  }
+  const btnApplyAiFill = overlay.querySelector('#btnApplyAiFill');
+  if(btnApplyAiFill){
+    btnApplyAiFill.addEventListener('click', ()=>{
+      const raw = overlay.querySelector('#aiResponse').value;
+      if(!raw.trim()){ alert('AIの回答を貼り付けてください'); return; }
+      let json;
+      try{ json = parseAiJson(raw); }catch(e){ alert('JSONの読み取りに失敗しました。AIの回答全体をそのまま貼り付けてください。'); return; }
+      applyAiFillToDraft(json);
+      alert('反映しました。内容を確認して保存してください（タグに「AI入力(要確認)」を追加しています）。');
+      renderOverlay();
+    });
+  }
+
+  const btnDel = overlay.querySelector('#btnDeleteCo');
+  if(btnDel) btnDel.addEventListener('click', ()=>{
+    if(confirm(`「${c.name}」を削除しますか？この操作は取り消せません。`)){
+      saveCompanies(companies.filter(x=>x.id!==c.id));
+      closeOverlay(); afterChange();
+    }
+  });
+
+  overlay.querySelectorAll('[data-copy]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const val = btn.dataset.copy;
+      const done = ()=>{ const old = btn.textContent; btn.textContent='コピー済み'; setTimeout(()=>{ btn.textContent=old; },1200); };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(val).then(done).catch(()=>{ alert('コピーに失敗しました'); });
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = val; document.body.appendChild(ta); ta.select();
+        try{ document.execCommand('copy'); done(); }catch(e){ alert('コピーに失敗しました'); }
+        document.body.removeChild(ta);
+      }
+    });
+  });
+  overlay.querySelectorAll('[data-togglepw]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const row = btn.closest('.mypage-row');
+      const span = row.querySelector('.mypage-pw');
+      const showing = span.dataset.shown === '1';
+      if(showing){ span.textContent = '••••••••'; span.dataset.shown='0'; btn.textContent='表示'; }
+      else { span.textContent = span.dataset.pw; span.dataset.shown='1'; btn.textContent='非表示'; }
+    });
+  });
+
+  overlay.querySelectorAll('[data-mystatus]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const s = btn.dataset.mystatus;
+      const cur = c.status||[];
+      const next = cur.includes(s) ? cur.filter(x=>x!==s) : [...cur, s];
+      saveCompanies(companies.map(x=>x.id===c.id?{...x,status:next}:x));
+      renderOverlay();
+    });
+  });
+  const memo = overlay.querySelector('#myMemo');
+  if(memo) memo.addEventListener('change', ()=> saveCompanies(companies.map(x=>x.id===c.id?{...x,memo:memo.value}:x)));
+
+  let selEvType = EVENT_TYPES[0];
+  overlay.querySelectorAll('[data-evtype]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      selEvType = btn.dataset.evtype;
+      overlay.querySelectorAll('[data-evtype]').forEach(b=>b.classList.toggle('on', b===btn));
+    });
+  });
+  overlay.querySelectorAll('[data-delev]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      armDeleteButton(btn, 'もう一度押して削除', ()=>{
+        const i = Number(btn.dataset.delev);
+        const events = [...(c.events||[])].sort((a,b)=>a.date.localeCompare(b.date));
+        const target = events[i];
+        if(!target) return;
+        events.splice(i,1);
+        saveCompanies(companies.map(x=>x.id===c.id?{...x,events}:x));
+        renderOverlay();
+      });
+    });
+  });
+  const btnAddEv = overlay.querySelector('#btnAddEv');
+  if(btnAddEv) btnAddEv.addEventListener('click', ()=>{
+    const date = overlay.querySelector('#evDate').value;
+    if(!date) return;
+    const endDate = overlay.querySelector('#evEndDate').value;
+    const time = overlay.querySelector('#evTime').value;
+    const memoV = overlay.querySelector('#evMemo').value;
+    const events = [...(c.events||[]), {type:selEvType, date, endDate, time, memo:memoV}];
+    saveCompanies(companies.map(x=>x.id===c.id?{...x,events}:x));
+    renderOverlay();
+  });
+
+  // ES・面接記録
+  const esRecordsNow = c.esRecords||[];
+  const editingEsRecord = esEditingId ? esRecordsNow.find(r=>String(r.id)===String(esEditingId)) : null;
+  let selEsType = editingEsRecord ? editingEsRecord.type : 'ES設問';
+  overlay.querySelectorAll('[data-estype]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      selEsType = btn.dataset.estype;
+      overlay.querySelectorAll('[data-estype]').forEach(b=>b.classList.toggle('on', b===btn));
+    });
+  });
+  const esAnswerTa = overlay.querySelector('#esAnswer');
+  const esAnswerCount = overlay.querySelector('#esAnswerCount');
+  if(esAnswerTa && esAnswerCount){
+    esAnswerTa.addEventListener('input', ()=>{ esAnswerCount.textContent = `${esAnswerTa.value.length}字`; });
+  }
+  const btnAddEs = overlay.querySelector('#btnAddEs');
+  if(btnAddEs) btnAddEs.addEventListener('click', ()=>{
+    const question = overlay.querySelector('#esQuestion').value.trim();
+    const answer = overlay.querySelector('#esAnswer').value;
+    const phaseEl = overlay.querySelector('#esPhase');
+    const phase = phaseEl ? phaseEl.value : '';
+    if(!question && !answer){ alert('質問か回答のどちらかは入力してください'); return; }
+    const list = c.esRecords||[];
+    let newList;
+    if(esEditingId){
+      newList = list.map(r=>String(r.id)===String(esEditingId)?{...r, type:selEsType, phase, question, answer}:r);
+    } else {
+      newList = [...list, {id:uid(), type:selEsType, phase, question, answer}];
+    }
+    esEditingId = null;
+    saveCompanies(companies.map(x=>x.id===c.id?{...x, esRecords:newList}:x));
+    renderOverlay();
+  });
+  const btnCancelEsEdit = overlay.querySelector('#btnCancelEsEdit');
+  if(btnCancelEsEdit) btnCancelEsEdit.addEventListener('click', ()=>{ esEditingId=null; renderOverlay(); });
+  overlay.querySelectorAll('[data-esedit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ esEditingId = btn.dataset.esedit; renderOverlay(); });
+  });
+  overlay.querySelectorAll('[data-esdel]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      armDeleteButton(btn, 'もう一度押して削除', ()=>{
+        const list = c.esRecords||[];
+        const rec = list.find(r=>String(r.id)===btn.dataset.esdel);
+        if(!rec) return;
+        const newList = list.filter(r=>String(r.id)!==btn.dataset.esdel);
+        if(String(esEditingId)===btn.dataset.esdel) esEditingId=null;
+        saveCompanies(companies.map(x=>x.id===c.id?{...x, esRecords:newList}:x));
+        renderOverlay();
+      });
+    });
+  });
+
+  const btnSave = overlay.querySelector('#btnSaveCo');
+  if(btnSave) btnSave.addEventListener('click', ()=>{
+    const name = overlay.querySelector('#fName').value.trim();
+    if(!name){ alert('企業名を入力してください'); return; }
+    const industryMajor = overlay.querySelector('#fIndustryMajor').value;
+    const industrySub = overlay.querySelector('#fIndustrySub').value.trim();
+    let salaryBase = overlay.querySelector('#fSalaryBase').value.trim();
+    let salaryAllowance = overlay.querySelector('#fSalaryAllowance').value.trim();
+    let salaryTotal = overlay.querySelector('#fSalaryTotal').value.trim();
+    // 基本給・手当額が数値のみで合計額が未入力の場合は自動計算
+    if(!salaryTotal && salaryBase && salaryAllowance){
+      const b = parseFloat(salaryBase), a = parseFloat(salaryAllowance);
+      if(!isNaN(b) && !isNaN(a) && /^[\d.]+$/.test(salaryBase) && /^[\d.]+$/.test(salaryAllowance)){
+        salaryTotal = String(Math.round((b+a)*100)/100) + (salaryBase.match(/[^\d.]+$/)?salaryBase.match(/[^\d.]+$/)[0]:'');
+      }
+    }
+    const updated = {
+      ...c,
+      name,
+      tier: overlay.querySelector('#fTier').value,
+      industryMajor, industrySub,
+      location: overlay.querySelector('#fLocation').value,
+      salaryBase, salaryAllowance, salaryTotal,
+      avgSalary: overlay.querySelector('#fAvg').value,
+      overtime: overlay.querySelector('#fOvertime').value,
+      paidLeaveRate: overlay.querySelector('#fPaid').value,
+      annualHolidays: overlay.querySelector('#fHolidays').value,
+      avgTenure: overlay.querySelector('#fTenure').value,
+      turnoverRate: overlay.querySelector('#fTurnover').value,
+      transfer: overlay.querySelector('#fTransfer').value,
+      remote: overlay.querySelector('#fRemote').value,
+      employeeCount: overlay.querySelector('#fEmployees').value,
+      dsFit: Number(overlay.querySelector('#fDsFit').value)||0,
+      tags: overlay.querySelector('#fTags').value.split(',').map(s=>s.trim()).filter(Boolean),
+      mainBusiness: overlay.querySelector('#fBiz').value,
+      strengths: overlay.querySelector('#fStrengths').value,
+      weaknesses: overlay.querySelector('#fWeak').value,
+      url: normalizeUrl(overlay.querySelector('#fUrl').value),
+      mypageUrl: normalizeUrl(overlay.querySelector('#fMypageUrl').value),
+      mypageId: overlay.querySelector('#fMypageId').value,
+      mypagePassword: overlay.querySelector('#fMypagePassword').value,
+    };
+    registerSubIfNew(industryMajor, industrySub);
+    const exists = companies.some(x=>x.id===c.id);
+    saveCompanies(exists ? companies.map(x=>x.id===c.id?updated:x) : [...companies, updated]);
+    detailId = updated.id; editMode=false; editDraft=null;
+    renderOverlay(); afterChange();
+  });
+}
+function afterChange(){ renderFilters(); renderSummary(); renderDeadlines(); renderBackupReminder(); renderContent(); if(state.tab==='calendar') renderCalendarPage(); }
+
+// ───────────────────────── 比較表 ─────────────────────────
+const COMPARE_ROWS = [
+  {label:'志望度', fn:c=>tierBadge(c.tier)},
+  {label:'業界(大分類)', fn:c=>esc(c.industryMajor||'—')},
+  {label:'業界(詳細)', fn:c=>esc(c.industrySub||'—')},
+  {label:'勤務地', fn:c=>esc(c.location||'—')},
+  {label:'初任給(基本給)', fn:c=>esc(c.salaryBase||'—')},
+  {label:'初任給(手当額)', fn:c=>esc(c.salaryAllowance||'—')},
+  {label:'初任給(合計額)', fn:c=>esc(c.salaryTotal||'—')},
+  {label:'平均年収', fn:c=>esc(c.avgSalary||'—')},
+  {label:'月残業', fn:c=>esc(c.overtime||'—')},
+  {label:'有給取得率', fn:c=>esc(c.paidLeaveRate||'—')},
+  {label:'年間休日', fn:c=>esc(c.annualHolidays||'—')},
+  {label:'平均勤続年数', fn:c=>esc(c.avgTenure||'—')},
+  {label:'離職率', fn:c=>esc(c.turnoverRate||'—')},
+  {label:'転勤の有無', fn:c=>esc(c.transfer||'—')},
+  {label:'リモート', fn:c=>esc(c.remote||'—')},
+  {label:'従業員数', fn:c=>esc(c.employeeCount||'—')},
+  {label:'スキル適性', fn:c=>fitDots(c.dsFit)},
+  {label:'強み', fn:c=>esc((c.strengths||'—').slice(0,36)+((c.strengths||'').length>36?'…':''))},
+];
+function openCompare(){
+  const overlay = document.getElementById('overlay');
+  const cols = companies.filter(c=>cmpSel.includes(c.id));
+  overlay.innerHTML = `
+    <div class="modal wide">
+      <div class="modal-hd"><h2>企業比較表</h2><button class="modal-x" id="closeCmp">&times;</button></div>
+      <div class="modal-bd">
+        ${cols.length===0?'<p class="empty">比較する企業を選択してください</p>':`
+        <div class="table-wrap"><table class="cmp-table">
+          <thead><tr><th>項目</th>${cols.map(c=>`<th>${esc(c.name)}</th>`).join('')}</tr></thead>
+          <tbody>${COMPARE_ROWS.map(r=>`<tr><td>${esc(r.label)}</td>${cols.map(c=>`<td>${r.fn(c)}</td>`).join('')}</tr>`).join('')}</tbody>
+        </table></div>`}
+      </div>
+    </div>`;
+  overlay.style.display='flex';
+  overlay.querySelector('#closeCmp').addEventListener('click', ()=>{ overlay.style.display='none'; overlay.innerHTML=''; });
+  overlay.addEventListener('click', e=>{ if(e.target===overlay){ overlay.style.display='none'; overlay.innerHTML=''; } });
+}
+
+// ───────────────────────── カレンダー ─────────────────────────
+function allEvents(){
+  const out = [];
+  companies.forEach(c=>(c.events||[]).forEach((ev,idx)=>out.push({...ev, coId:c.id, coName:c.name, evIdx:idx})));
+  return out;
+}
+function renderCalendarPage(){
+  const page = document.getElementById('calPage');
+  const year = calDate.getFullYear(), month = calDate.getMonth();
+  const tod = today();
+  const firstDay = new Date(year,month,1).getDay();
+  const daysInMonth = new Date(year,month+1,0).getDate();
+  const evs = allEvents();
+  function getEvs(d){
+    const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    return evs.filter(e => ds>=e.date && ds<=evEnd(e));
+  }
+  const cells = []; for(let i=0;i<firstDay;i++) cells.push(null); for(let d=1; d<=daysInMonth; d++) cells.push(d);
+  const selEvs = calSel ? getEvs(calSel) : [];
+  page.innerHTML = `
+    <div class="view-row" style="margin-top:0;">
+      <div></div>
+      <button class="btn btn-primary" id="btnAddEvGlobal">＋ 予定を追加</button>
+    </div>
+    <div class="cal-wrap">
+      <div class="cal-nav"><button data-cal="prev">‹</button><h3>${year}年${month+1}月</h3><button data-cal="next">›</button></div>
+      <div class="cal-grid" style="margin-bottom:4px">${['日','月','火','水','木','金','土'].map((d,i)=>`<div class="cal-dh ${i===0?'sun':i===6?'sat':''}">${d}</div>`).join('')}</div>
+      <div class="cal-grid">${cells.map((d,i)=>{
+        if(!d) return '<div class="cal-cell empty"></div>';
+        const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const dayEvs = getEvs(d);
+        const dow = i%7;
+        let cls = calSel===d?'selected':ds===tod?'today':'';
+        if(dayEvs.length>0) cls += ' has-event';
+        return `<div class="cal-cell ${cls}" data-calday="${d}">
+          <div class="cal-date ${dow===0?'sun':dow===6?'sat':''}">${d}</div>
+          ${dayEvs.slice(0,3).map(e=>{ const col=evTypeColor(e.type); return `<div class="cal-dot" style="background:${col[0]};color:${col[1]}" title="${esc(e.type)}">${esc(e.coName.slice(0,4))}</div>`; }).join('')}
+        </div>`;
+      }).join('')}</div>
+      ${calSel ? `<div class="cal-detail">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+          <div style="font-weight:700;font-size:13px;">${month+1}月${calSel}日の予定</div>
+          <button class="btn btn-gray btn-sm" id="btnAddEvForDay">＋ この日に予定を追加</button>
+        </div>
+        ${selEvs.length===0?'<p class="note">予定なし</p>':selEvs.map(e=>`
+          <div class="ev-card">
+            <div class="ev-card-hd"><span class="tag" style="background:${evTypeColor(e.type)[0]};color:${evTypeColor(e.type)[1]}">${esc(e.type)}</span><span style="font-weight:600;cursor:pointer" data-gotocard="${e.coId}">${esc(e.coName)}</span><span class="note">${esc(fmtEv(e))}</span></div>
+            ${e.memo?`<div class="ev-memo">${esc(e.memo)}</div>`:''}
+          </div>`).join('')}
+      </div>` : `
+        ${evs.filter(e=>{ const ds0=`${year}-${String(month+1).padStart(2,'0')}`; return e.date.startsWith(ds0)||evEnd(e).startsWith(ds0); }).length>0 ? `
+        <div class="cal-detail">
+          <div style="font-size:12px;color:var(--sub);margin-bottom:6px">日付をクリックすると詳細が見られます</div>
+        </div>` : ''}`}
+    </div>
+  `;
+  page.querySelectorAll('[data-cal="prev"]').forEach(b=>b.addEventListener('click', ()=>{ calDate=new Date(year,month-1,1); calSel=null; renderCalendarPage(); }));
+  page.querySelectorAll('[data-cal="next"]').forEach(b=>b.addEventListener('click', ()=>{ calDate=new Date(year,month+1,1); calSel=null; renderCalendarPage(); }));
+  page.querySelectorAll('[data-calday]').forEach(el=>el.addEventListener('click', ()=>{ const d=Number(el.dataset.calday); calSel = calSel===d?null:d; renderCalendarPage(); }));
+  page.querySelectorAll('[data-gotocard]').forEach(el=>el.addEventListener('click', ()=>openDetail(Number(el.dataset.gotocard))));
+  const btnAddGlobal = page.querySelector('#btnAddEvGlobal');
+  if(btnAddGlobal) btnAddGlobal.addEventListener('click', ()=>openAddEventModal());
+  const btnAddForDay = page.querySelector('#btnAddEvForDay');
+  if(btnAddForDay){
+    const prefill = calSel ? `${year}-${String(month+1).padStart(2,'0')}-${String(calSel).padStart(2,'0')}` : '';
+    btnAddForDay.addEventListener('click', ()=>openAddEventModal(prefill));
+  }
+}
+
+// ───────────────────────── 自己分析ノート（ES・面接対策の使い回し用ストック） ─────────────────────────
+const NOTE_CATEGORIES = ['自己PR','ガクチカ','強み・弱み','スキル・資格','志望動機の軸','面接Q&A','その他'];
+const LS_NOTES_KEY = 'career-map-profile-notes-v1';
+function loadProfileNotes(){
+  try{ const raw = localStorage.getItem(LS_NOTES_KEY); if(raw){ const d = JSON.parse(raw); if(Array.isArray(d)) return d; } }catch(e){}
+  return [];
+}
+function saveProfileNotes(list){ profileNotes = list; try{ localStorage.setItem(LS_NOTES_KEY, JSON.stringify(list)); }catch(e){} }
+let profileNotes = loadProfileNotes();
+let noteEditDraft = null;
+
+function renderProfilePage(){
+  const page = document.getElementById('profilePage');
+  const grouped = {};
+  NOTE_CATEGORIES.forEach(cat=>grouped[cat]=[]);
+  profileNotes.forEach(n=>{ if(!grouped[n.category]) grouped[n.category]=[]; grouped[n.category].push(n); });
+  const catsToShow = state.noteCategory ? [state.noteCategory] : NOTE_CATEGORIES.filter(cat=>(grouped[cat]||[]).length>0);
+
+  const chipsHtml = `<div class="chip-row" id="noteCatFilters">
+      <span class="chip${state.noteCategory===null?' active':''}" data-notecat="all">すべて</span>
+      ${NOTE_CATEGORIES.map(cat=>`<span class="chip${state.noteCategory===cat?' active':''}" data-notecat="${esc(cat)}">${esc(cat)}（${(grouped[cat]||[]).length}）</span>`).join('')}
+    </div>`;
+
+  const groupsHtml = catsToShow.length===0 ? '<div class="empty">まだノートがありません。「＋ノートを追加」から、自己PRやガクチカなど、ES・面接で使い回す内容を書き溜めておきましょう。</div>' :
+    catsToShow.map(cat=>{
+      const items = grouped[cat]||[];
+      return `<div class="note-group">
+        <h3 class="note-group-hd">${esc(cat)}（${items.length}）</h3>
+        ${items.length===0?'<p class="note">まだありません</p>':items.map(n=>`
+          <div class="note-card">
+            <div class="note-card-hd">
+              <strong>${esc(n.title||'(無題)')}</strong>
+              <div class="note-card-actions">
+                <button class="btn btn-gray btn-sm" data-noteedit="${n.id}">編集</button>
+                <button class="btn btn-gray btn-sm" data-notedel="${n.id}">削除</button>
+              </div>
+            </div>
+            <div class="note-card-body">${esc(n.content||'（内容未入力）')}</div>
+          </div>`).join('')}
+      </div>`;
+    }).join('');
+
+  page.innerHTML = `
+    <div class="view-row" style="margin-top:0;">
+      ${chipsHtml}
+      <button class="btn btn-primary" id="btnAddNote" style="flex-shrink:0;">＋ ノートを追加</button>
+    </div>
+    <p class="note" style="margin-top:10px;">ES・面接対策を書くときに見返せる、自分専用のストックです（自己PR・ガクチカ・志望動機の軸・よく聞かれる質問への回答など）。企業ごとの記録ではなく、複数の企業で使い回せる内容をここにまとめておくと、ESを書くたびにゼロから考え直さずに済みます。「この企業でこう聞かれてこう答えた」という記録は、各企業の詳細画面の「📝 ES対策」タブに残せます。</p>
+    ${groupsHtml}
+  `;
+  bindProfileEvents();
+}
+function bindProfileEvents(){
+  document.querySelectorAll('#noteCatFilters .chip').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      state.noteCategory = el.dataset.notecat==='all' ? null : el.dataset.notecat;
+      renderProfilePage();
+    });
+  });
+  const addBtn = document.getElementById('btnAddNote');
+  if(addBtn) addBtn.addEventListener('click', openNoteAdd);
+  document.querySelectorAll('[data-noteedit]').forEach(el=>{
+    el.addEventListener('click', ()=> openNoteEdit(el.dataset.noteedit));
+  });
+  document.querySelectorAll('[data-notedel]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      armDeleteButton(el, 'もう一度押して削除', ()=>{
+        saveProfileNotes(profileNotes.filter(x=>String(x.id)!==el.dataset.notedel));
+        renderProfilePage();
+      });
+    });
+  });
+}
+function openNoteAdd(){
+  noteEditDraft = {id:uid(), category:NOTE_CATEGORIES[0], title:'', content:''};
+  renderNoteOverlay();
+}
+function openNoteEdit(idStr){
+  const n = profileNotes.find(x=>String(x.id)===String(idStr));
+  if(!n) return;
+  noteEditDraft = JSON.parse(JSON.stringify(n));
+  renderNoteOverlay();
+}
+function closeNoteOverlay(){
+  noteEditDraft = null;
+  const overlay = document.getElementById('overlay');
+  overlay.style.display = 'none'; overlay.innerHTML = '';
+}
+function renderNoteOverlay(){
+  const overlay = document.getElementById('overlay');
+  const n = noteEditDraft;
+  const isNew = !profileNotes.some(x=>x.id===n.id);
+  overlay.innerHTML = `
+    <div class="modal">
+      <div class="modal-hd"><h2>${isNew?'ノートを追加':'ノートを編集'}</h2><button class="modal-x" id="closeNoteOverlay">&times;</button></div>
+      <div class="modal-bd">
+        <div class="field"><label class="lbl">カテゴリ</label>
+          <select class="sel" id="nCategory">${NOTE_CATEGORIES.map(c=>`<option value="${esc(c)}" ${n.category===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
+        </div>
+        <div class="field"><label class="lbl">タイトル</label><input class="inp" id="nTitle" value="${esc(n.title)}" placeholder="例: ガクチカ（サークル運営編）"></div>
+        <div class="field"><label class="lbl">内容</label><textarea class="ta" id="nContent" rows="12" placeholder="ES・面接で使う文章の下書きをここに書いておくと、あとで見返して使い回せます">${esc(n.content)}</textarea></div>
+        <div class="form-actions">
+          <button class="btn btn-primary" id="btnSaveNote">保存</button>
+          <button class="btn btn-gray" id="btnCancelNote">キャンセル</button>
+        </div>
+      </div>
+    </div>
+  `;
+  overlay.style.display = 'flex';
+  document.getElementById('closeNoteOverlay').addEventListener('click', closeNoteOverlay);
+  document.getElementById('btnCancelNote').addEventListener('click', closeNoteOverlay);
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) closeNoteOverlay(); });
+  document.getElementById('btnSaveNote').addEventListener('click', ()=>{
+    const category = document.getElementById('nCategory').value;
+    const title = document.getElementById('nTitle').value.trim();
+    const content = document.getElementById('nContent').value;
+    if(!title && !content){ alert('タイトルか内容のどちらかは入力してください'); return; }
+    const updated = { ...n, category, title, content };
+    const exists = profileNotes.some(x=>x.id===n.id);
+    const list = exists ? profileNotes.map(x=>x.id===n.id?updated:x) : [...profileNotes, updated];
+    saveProfileNotes(list);
+    closeNoteOverlay();
+    renderProfilePage();
+  });
+}
+
+// ───────────────────────── カレンダーからの予定追加(企業を選んで登録) ─────────────────────────
+function openAddEventModal(prefillDate){
+  const overlay = document.getElementById('overlay');
+  const sorted = [...companies].sort((a,b)=>a.name.localeCompare(b.name,'ja'));
+  overlay.innerHTML = `
+    <div class="modal">
+      <div class="modal-hd"><h2>予定を追加</h2><button class="modal-x" id="closeAddEv">&times;</button></div>
+      <div class="modal-bd">
+        <div class="field">
+          <label class="lbl">企業を選択 *</label>
+          <select class="sel" id="aeCompany">
+            ${sorted.length===0?'<option value="">（登録されている企業がありません）</option>':sorted.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field">
+          <label class="lbl">種類</label>
+          <div class="ev-add-row" id="aeTypeRow">${EVENT_TYPES.map((t,i)=>`<button type="button" class="ev-type-btn ${i===0?'on':''}" data-aetype="${esc(t)}">${esc(t)}</button>`).join('')}</div>
+        </div>
+        <div class="grid2" style="grid-template-columns:1fr 1fr 1fr;">
+          <div class="field"><label class="lbl">開始日 *</label><input class="inp" type="date" id="aeDate" value="${esc(prefillDate||'')}"></div>
+          <div class="field"><label class="lbl">終了日(複数日の場合)</label><input class="inp" type="date" id="aeEndDate"></div>
+          <div class="field"><label class="lbl">時間</label><input class="inp" type="time" id="aeTime"></div>
+        </div>
+        <p class="note" style="margin:-6px 0 8px;">💡 日付・時間欄はカレンダーを開かなくても、欄内をクリックして数字キーで直接入力できます</p>
+        <div class="field"><label class="lbl">メモ</label><textarea class="ta" rows="3" id="aeMemo" placeholder="聞いた話・感想など（複数行OK）"></textarea></div>
+        <div class="form-actions">
+          <button class="btn btn-primary" id="btnSaveAddEv">追加</button>
+          <button class="btn btn-gray" id="btnCancelAddEv">キャンセル</button>
+        </div>
+      </div>
+    </div>
+  `;
+  overlay.style.display='flex';
+  let selType = EVENT_TYPES[0];
+  overlay.querySelectorAll('[data-aetype]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      selType = btn.dataset.aetype;
+      overlay.querySelectorAll('[data-aetype]').forEach(b=>b.classList.toggle('on', b===btn));
+    });
+  });
+  const close = ()=>{ overlay.style.display='none'; overlay.innerHTML=''; };
+  overlay.querySelector('#closeAddEv').addEventListener('click', close);
+  overlay.querySelector('#btnCancelAddEv').addEventListener('click', close);
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) close(); });
+  overlay.querySelector('#btnSaveAddEv').addEventListener('click', ()=>{
+    const coId = Number(overlay.querySelector('#aeCompany').value);
+    const date = overlay.querySelector('#aeDate').value;
+    if(!coId || !date){ alert('企業と日付を選択してください'); return; }
+    const endDate = overlay.querySelector('#aeEndDate').value;
+    const time = overlay.querySelector('#aeTime').value;
+    const memo = overlay.querySelector('#aeMemo').value;
+    const updated = companies.map(x=>x.id===coId?{...x, events:[...(x.events||[]), {type:selType, date, endDate, time, memo}]}:x);
+    saveCompanies(updated);
+    close();
+    afterChange();
+    renderCalendarPage();
+  });
+}
+
+// ───────────────────────── タブ切り替え ─────────────────────────
+document.getElementById('mainTabs').querySelectorAll('button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    state.tab = btn.dataset.tab;
+    document.getElementById('mainTabs').querySelectorAll('button').forEach(b=>b.classList.toggle('active', b===btn));
+    document.getElementById('listPage').style.display = state.tab==='list' ? 'block':'none';
+    document.getElementById('calPage').style.display = state.tab==='calendar' ? 'block':'none';
+    document.getElementById('profilePage').style.display = state.tab==='profile' ? 'block':'none';
+    document.getElementById('deadlineBox').style.display = state.tab==='calendar' ? '' : 'none';
+    if(state.tab==='calendar') renderCalendarPage();
+    if(state.tab==='profile') renderProfilePage();
+  });
+});
+document.getElementById('deadlineBox').style.display = state.tab==='calendar' ? '' : 'none';
+
+// ───────────────────────── 設定メニュー（エクスポート/インポート/リセット）─────────────────────────
+document.getElementById('btnSettings').addEventListener('click', ()=>{
+  document.getElementById('settingsMenu').classList.toggle('open');
+});
+document.addEventListener('click', e=>{
+  const menu = document.getElementById('settingsMenu');
+  if(menu.classList.contains('open') && !menu.contains(e.target) && e.target.id!=='btnSettings'){ menu.classList.remove('open'); }
+});
+document.getElementById('btnExport').addEventListener('click', ()=>{
+  const payload = { companies, profileNotes };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'career-map-data.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  setLastExportNow();
+  renderBackupReminder();
+  document.getElementById('settingsMenu').classList.remove('open');
+});
+document.getElementById('btnImport').addEventListener('click', ()=>{
+  document.getElementById('importFile').click();
+  document.getElementById('settingsMenu').classList.remove('open');
+});
+document.getElementById('importFile').addEventListener('change', e=>{
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const data = JSON.parse(reader.result);
+      // 新形式 {companies, profileNotes} と、旧形式（企業配列そのまま）の両方に対応
+      const coData = Array.isArray(data) ? data : data.companies;
+      const noteData = Array.isArray(data) ? null : data.profileNotes;
+      if(!Array.isArray(coData)) throw new Error('invalid');
+      const noteMsg = Array.isArray(noteData) ? `・自己分析ノート${noteData.length}件` : '';
+      if(confirm(`企業データ${coData.length}件${noteMsg}を読み込みます。現在のデータは上書きされます。よろしいですか？`)){
+        saveCompanies(coData);
+        if(Array.isArray(noteData)) saveProfileNotes(noteData);
+        afterChange();
+        if(state.tab==='profile') renderProfilePage();
+      }
+    }catch(err){ alert('JSONファイルの読み込みに失敗しました。'); }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+});
+document.getElementById('btnReset').addEventListener('click', ()=>{
+  document.getElementById('settingsMenu').classList.remove('open');
+  if(confirm('現在の企業データ・ステータス・メモ・予定をすべて削除し、初期データに戻します。よろしいですか？')){
+    saveCompanies(seedData());
+    afterChange();
+  }
+});
+
+// ───────────────────────── その他イベント登録 ─────────────────────────
+document.getElementById('search').addEventListener('input', e=>{ state.search=e.target.value.trim(); renderContent(); });
+document.getElementById('sort').addEventListener('change', e=>{ state.sort=e.target.value; renderContent(); });
+document.getElementById('viewSeg').querySelectorAll('button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    state.view = btn.dataset.view;
+    document.getElementById('viewSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('active', b===btn));
+    renderContent();
+  });
+});
+document.getElementById('btnCmpMode').addEventListener('click', ()=>{
+  cmpMode = !cmpMode;
+  document.getElementById('btnCmpMode').classList.toggle('active', cmpMode);
+  if(!cmpMode) cmpSel=[];
+  renderContent();
+});
+document.getElementById('btnOpenCompare').addEventListener('click', openCompare);
+document.getElementById('btnCancelCmp').addEventListener('click', ()=>{
+  cmpMode=false; cmpSel=[];
+  document.getElementById('btnCmpMode').classList.remove('active');
+  renderContent();
+});
+document.getElementById('btnAddCo').addEventListener('click', openAddCompany);
+
+// ───────────────────────── テーマ切り替え ─────────────────────────
+const LS_THEME_KEY = 'career-map-theme';
+function systemPrefersDark(){ return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
+function effectiveTheme(){
+  const t = document.documentElement.getAttribute('data-theme');
+  if(t==='dark'||t==='light') return t;
+  return systemPrefersDark() ? 'dark' : 'light';
+}
+function updateThemeBtn(){
+  document.getElementById('btnTheme').textContent = effectiveTheme()==='dark' ? '☀️' : '🌙';
+}
+function initTheme(){
+  try{
+    const saved = localStorage.getItem(LS_THEME_KEY);
+    if(saved==='dark'||saved==='light') document.documentElement.setAttribute('data-theme', saved);
+  }catch(e){}
+  updateThemeBtn();
+}
+document.getElementById('btnTheme').addEventListener('click', ()=>{
+  const next = effectiveTheme()==='dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try{ localStorage.setItem(LS_THEME_KEY, next); }catch(e){}
+  updateThemeBtn();
+});
+initTheme();
+
+// ───────────────────────── 初期描画 ─────────────────────────
+renderFilters();
+renderSummary();
+renderDeadlines();
+renderBackupReminder();
+renderContent();
+</script>
+
+</body>
+</html>
