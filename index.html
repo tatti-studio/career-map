@@ -18,7 +18,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Career Map">
 <!-- 更新のたびにこの値を変える（例: 2026-09-10-1）。ホーム画面追加時の更新チェックに使用。 -->
-<meta name="app-version" content="2026-09-11-1">
+<meta name="app-version" content="2026-09-11-2">
 <style>
   :root{
     --bg:#f5f7fa; --card:#ffffff; --text:#1a1d23; --sub:#5b6472;
@@ -121,6 +121,8 @@
   .mypage-inline-open{text-decoration:none;flex-shrink:0;white-space:nowrap;}
   .mypage-inline button{background:none;border:none;cursor:pointer;font-size:12px;padding:0 2px;color:var(--sub);}
   .mypage-inline button:hover{color:var(--accent);}
+  .mypage-quick-btn{background:var(--accent-soft);color:var(--accent);border:none;border-radius:8px;padding:4px 9px;font-size:13px;line-height:1.4;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;flex-shrink:0;}
+  .mypage-quick-btn:hover{background:var(--accent);color:#fff;}
   .tier{font-size:11px;font-weight:800;color:#fff;padding:3px 9px;border-radius:6px;white-space:nowrap;}
   .tier.unset{background:var(--border);color:var(--sub);}
   .industry{font-size:12px;color:var(--sub);}
@@ -319,6 +321,7 @@
       <button data-view="tier">🏆 志望度別</button>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-gray" id="btnToggleCompact">📄 簡易表示</button>
       <button class="btn btn-gray" id="btnCmpMode">⚖️ 比較モード</button>
       <button class="btn btn-gray" id="btnBulkAdd">🤖 まとめて追加</button>
       <button class="btn btn-primary" id="btnAddCo">＋ 企業を追加</button>
@@ -729,6 +732,16 @@ function buildMypageInline(c){
     ${c.mypagePassword?`<span class="mypage-inline-val mypage-inline-pw">PW: ${shown?esc(c.mypagePassword):'••••••'}</span><button type="button" data-toggleinlinepw="${c.id}" title="${shown?'隠す':'表示'}">${shown?'🙈':'👁'}</button>`:''}
   </div>`;
 }
+// 簡易表示時：カード上部にマイページへの最短導線だけを残す小さなボタン。
+// URLがあれば直接開き、ID/PWのみの場合はステータスタブ（マイページ欄）を直接開く。
+function buildMypageQuickBtn(c){
+  const has = c.mypageUrl || c.mypageId || c.mypagePassword;
+  if(!has) return '';
+  if(c.mypageUrl){
+    return `<a class="mypage-quick-btn" href="${esc(normalizeUrl(c.mypageUrl))}" target="_blank" rel="noopener" title="マイページを開く">🔑</a>`;
+  }
+  return `<button type="button" class="mypage-quick-btn" data-mypagequick="${c.id}" title="マイページ情報を見る">🔑</button>`;
+}
 
 // ───────────────────────── バックアップ（エクスポート）リマインド ─────────────────────────
 // localStorageのみで完結する構成上、端末故障やブラウザデータ消去でデータが失われるリスクがあるため、
@@ -879,25 +892,29 @@ function renderGrid(list){
   return `<div class="grid">${list.map(c=>{
     const mainSt = (c.status||[])[0];
     const stColor = mainSt ? (STATUS_COLOR[mainSt]||'#eee|#666').split('|') : null;
-    return `<div class="card" data-open="${c.id}">
+    return `<div class="card${compactView?' compact':''}" data-open="${c.id}">
       ${cmpMode?`<div class="compare-check ${cmpSel.includes(c.id)?'on':''}" data-cmpchk="${c.id}">${cmpSel.includes(c.id)?'✓':''}</div>`:''}
       <div class="card-top">
         <div class="card-name-row">
           <button class="fav-star ${c.favorite?'on':''}" data-fav="${c.id}" title="お気に入り">${c.favorite?'★':'☆'}</button>
           <h2>${esc(c.name)}</h2>
         </div>
-        ${tierBadge(c.tier)}
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          ${compactView?buildMypageQuickBtn(c):''}
+          ${tierBadge(c.tier)}
+        </div>
       </div>
       <div class="industry">${esc(industryLabel(c))} ・ ${esc(c.location||'')}</div>
+      ${compactView?'':`
       <div class="metrics">
         <div><span class="metric-label">初任給(合計)</span><br><span class="metric-val">${esc(c.salaryTotal||'—')}</span></div>
         <div><span class="metric-label">平均年収</span><br><span class="metric-val">${esc(c.avgSalary||'—')}</span></div>
         <div><span class="metric-label">残業</span><br><span class="metric-val">${esc(c.overtime||'—')}</span></div>
         <div><span class="metric-label">スキル適性</span><br><span class="fit">${fitDots(c.dsFit)}</span></div>
       </div>
-      <div class="tags">${(c.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
+      <div class="tags">${(c.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>`}
       ${mainSt?`<span class="my-status" style="background:${stColor[0]};color:${stColor[1]}">${esc(mainSt)}${(c.status||[]).length>1?` +${c.status.length-1}`:''}</span>`:''}
-      ${buildMypageInline(c)}
+      ${compactView?'':buildMypageInline(c)}
     </div>`;
   }).join('')}</div>`;
 }
@@ -924,6 +941,15 @@ function bindContentEvents(){
   });
   document.querySelectorAll('[data-mypagerow]').forEach(el=>{
     el.addEventListener('click', e=>{ e.stopPropagation(); });
+  });
+  document.querySelectorAll('.mypage-quick-btn').forEach(el=>{
+    el.addEventListener('click', e=>{ e.stopPropagation(); });
+  });
+  document.querySelectorAll('[data-mypagequick]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      if(cmpMode) return;
+      openDetail(Number(el.dataset.mypagequick), 'mystatus');
+    });
   });
   document.querySelectorAll('[data-toggleinlinepw]').forEach(el=>{
     el.addEventListener('click', e=>{
@@ -956,7 +982,7 @@ function renderCmpBar(){
 // ───────────────────────── 詳細/編集モーダル ─────────────────────────
 let detailTab = 'overview';
 let esEditingId = null;
-function openDetail(id){ detailId=id; editMode=false; editDraft=null; detailTab='overview'; esEditingId=null; renderOverlay(); }
+function openDetail(id, tab){ detailId=id; editMode=false; editDraft=null; detailTab=tab||'overview'; esEditingId=null; renderOverlay(); }
 function openAddCompany(){
   detailId = null; editMode = true;
   editDraft = {id:uid(), name:'', industryMajor:'', industrySub:'', location:'', salaryBase:'', salaryAllowance:'', salaryTotal:'', avgSalary:'', overtime:'', paidLeaveRate:'', annualHolidays:'', avgTenure:'', turnoverRate:'', transfer:'', remote:'', employeeCount:'', mainBusiness:'', strengths:'', weaknesses:'', url:'', tags:[], dsFit:0, tier:'', status:[], memo:'', events:[], favorite:false, esRecords:[]};
@@ -2049,6 +2075,30 @@ document.getElementById('btnCancelCmp').addEventListener('click', ()=>{
 });
 document.getElementById('btnAddCo').addEventListener('click', openAddCompany);
 document.getElementById('btnBulkAdd').addEventListener('click', openBulkAdd);
+
+// ───────────────────────── 簡易表示（スマホでの一覧スクロールを楽にする） ─────────────────────────
+// 金額などの詳細指標・タグ・マイページ詳細を隠し、名前・志望度・ステータスだけの短いカードにする。
+// マイページへのアクセスは、カード右上の🔑ボタン（URLがあれば直接開く、なければステータスタブを直接開く）で維持する。
+const LS_COMPACT_KEY = 'career-map-compact-v1';
+let compactView = false;
+function updateCompactBtn(){
+  const btn = document.getElementById('btnToggleCompact');
+  if(!btn) return;
+  btn.textContent = compactView ? '📄 通常表示に戻す' : '📄 簡易表示';
+  btn.classList.toggle('btn-primary', compactView);
+  btn.classList.toggle('btn-gray', !compactView);
+}
+function initCompactView(){
+  try{ compactView = localStorage.getItem(LS_COMPACT_KEY) === '1'; }catch(e){ compactView = false; }
+  updateCompactBtn();
+}
+document.getElementById('btnToggleCompact').addEventListener('click', ()=>{
+  compactView = !compactView;
+  try{ localStorage.setItem(LS_COMPACT_KEY, compactView?'1':'0'); }catch(e){}
+  updateCompactBtn();
+  renderContent();
+});
+initCompactView();
 
 // ───────────────────────── テーマ切り替え ─────────────────────────
 const LS_THEME_KEY = 'career-map-theme';
