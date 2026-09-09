@@ -18,7 +18,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Career Map">
 <!-- 更新のたびにこの値を変える（例: 2026-09-10-1）。ホーム画面追加時の更新チェックに使用。 -->
-<meta name="app-version" content="2026-09-10-1">
+<meta name="app-version" content="2026-09-10-2">
 <style>
   :root{
     --bg:#f5f7fa; --card:#ffffff; --text:#1a1d23; --sub:#5b6472;
@@ -42,6 +42,7 @@
   .wrap{max-width:1100px;margin:0 auto;padding:0 20px;}
   header{padding:22px 20px 10px;}
   header .wrap{padding:0;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+  header .wrap.wrap-stack{flex-direction:column;align-items:stretch;}
   h1{font-size:19px;margin:0 0 4px;}
   header p{margin:0;color:var(--sub);font-size:12.5px;max-width:680px;}
   .hd-actions{display:flex;gap:6px;flex-shrink:0;}
@@ -78,8 +79,8 @@
   .dl-date{font-weight:700;font-variant-numeric:tabular-nums;}
 
   .controls{margin-top:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
-  .controls input[type=text]{flex:1 1 200px;padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:14px;}
-  .controls select{padding:9px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;}
+  .controls input[type=text]{flex:1 1 200px;padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:16px;}
+  .controls select{padding:9px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:16px;}
   .chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
   .chip{padding:6px 12px;border-radius:999px;border:1px solid var(--border);background:var(--card);font-size:12px;cursor:pointer;color:var(--sub);user-select:none;transition:background .15s,border-color .15s,color .15s;}
   .chip:hover{border-color:var(--accent);color:var(--accent);}
@@ -181,9 +182,9 @@
   .st-pill{padding:6px 11px;border-radius:999px;font-size:11.5px;font-weight:600;border:1px solid var(--border);cursor:pointer;background:var(--card);color:var(--sub);transition:background .15s,border-color .15s,color .15s;}
   .st-pill:hover{border-color:var(--accent);}
   .st-pill.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);}
-  .ta{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;background:var(--card);color:var(--text);resize:vertical;font-family:inherit;margin-top:6px;}
-  .inp{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;background:var(--card);color:var(--text);}
-  .sel{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;background:var(--card);color:var(--text);}
+  .ta{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:16px;background:var(--card);color:var(--text);resize:vertical;font-family:inherit;margin-top:6px;}
+  .inp{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:16px;background:var(--card);color:var(--text);}
+  .sel{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:16px;background:var(--card);color:var(--text);}
   .lbl{display:block;font-size:11px;font-weight:700;color:var(--sub);margin-bottom:4px;}
   .field{margin-bottom:12px;}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
@@ -194,7 +195,7 @@
   .ev-memo{font-size:12px;color:var(--sub);margin-top:6px;white-space:pre-wrap;}
   .ev-add{background:var(--bg);border-radius:10px;padding:10px;}
   .ev-add-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;}
-  .ev-add-row input,.ev-add-row select{border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:12px;background:var(--card);color:var(--text);}
+  .ev-add-row input,.ev-add-row select{border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:16px;background:var(--card);color:var(--text);}
   .ev-type-btn{padding:5px 10px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid var(--border);cursor:pointer;background:var(--card);color:var(--sub);}
   .ev-type-btn.on{background:var(--accent);color:#fff;border-color:var(--accent);}
   .cmp-table{border-collapse:collapse;width:100%;font-size:12px;}
@@ -267,7 +268,7 @@
       <button id="btnReset">🔄 初期データにリセット</button>
     </div>
   </div>
-  <div class="wrap">
+  <div class="wrap wrap-stack">
     <nav class="tabs" id="mainTabs">
       <button data-tab="list" class="active">🏢 企業一覧</button>
       <button data-tab="calendar">📅 カレンダー</button>
@@ -314,8 +315,9 @@
       <button data-view="list" class="active">📋 一覧</button>
       <button data-view="tier">🏆 志望度別</button>
     </div>
-    <div style="display:flex;gap:8px;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
       <button class="btn btn-gray" id="btnCmpMode">⚖️ 比較モード</button>
+      <button class="btn btn-gray" id="btnBulkAdd">🤖 まとめて追加</button>
       <button class="btn btn-primary" id="btnAddCo">＋ 企業を追加</button>
     </div>
   </div>
@@ -453,6 +455,134 @@ function applyAiFillToDraft(json){
     }
   });
   if(!editDraft.tags.includes('AI入力(要確認)')) editDraft.tags = [...editDraft.tags, 'AI入力(要確認)'];
+}
+// ───────────────────────── 複数企業まとめてAI下書き ─────────────────────────
+// 企業を1社ずつ登録するのは手間がかかるため、複数社の企業名をまとめてAIに調べてもらい、
+// JSON配列で返ってきた内容を一括で企業一覧に追加できるようにする機能。
+function buildBulkAiPrompt(namesText){
+  const names = String(namesText||'').split(/[\n,、]/).map(s=>s.trim()).filter(Boolean);
+  const list = names.length ? names.join('、') : '（ここに調べたい企業名をカンマまたは改行区切りで入力してください）';
+  return `就活生向けの企業比較のために、次の複数の企業それぞれについて調べて、JSON配列形式のみで回答してください（JSON以外の文章や説明は一切含めないでください）。分からない項目は文字列なら空文字""、数値なら0にしてください。まず各企業の公式サイト・採用ページ・IR情報を優先して確認し、そこに載っていない項目は就職四季報やニュース記事など他の信頼できる情報源で補ってください。それでも分からない場合は、不確かな推測を書かず空欄にしてください。
+
+企業名一覧: ${list}
+
+出力するJSON（配列の中に、企業ごとに1つずつオブジェクトを入れてください。キー名はそのまま。値だけ埋めてください）:
+[
+  {
+    "name": "企業名（そのまま）",
+    "industryMajor": "次のいずれか1つ: 金融/IT・メディア/自動車・機械/小売・卸/サービス/建設・不動産/物流・運送/資源・素材/電機・精密/食品/生活関連/飲食/娯楽・レジャー/その他",
+    "industrySub": "業界の詳細分類（自由記述）",
+    "location": "本社所在地",
+    "salaryBase": "初任給の基本給（例: 22万円）",
+    "salaryAllowance": "初任給の諸手当額（例: 1.5万円）",
+    "salaryTotal": "初任給の合計額（例: 23.5万円）",
+    "avgSalary": "平均年収（例: 650万円）",
+    "overtime": "月平均残業時間（例: 20時間）",
+    "paidLeaveRate": "有給取得率（例: 70%）",
+    "annualHolidays": "年間休日数（例: 120日）",
+    "avgTenure": "平均勤続年数（例: 12.5年）",
+    "turnoverRate": "離職率の目安（例: 3年以内離職率10%）",
+    "transfer": "転勤の有無・範囲",
+    "remote": "リモートワーク制度の概要",
+    "employeeCount": "従業員数",
+    "mainBusiness": "事業内容（100字程度）",
+    "strengths": "就活生から見た強み・魅力（100字程度）",
+    "weaknesses": "就活生から見た懸念点・注意点（100字程度）",
+    "url": "採用ページのURL",
+    "tags": ["キーワードタグを2〜4個の配列"],
+    "dsFit": "自分の専攻・スキル・強みをどれだけ活かせそうかの目安を0〜5の整数で"
+  }
+]`;
+}
+function parseBulkAiJson(raw){
+  let s = raw.trim();
+  s = s.replace(/^﻿/, '').replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
+  const fence = s.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if(fence) s = fence[1].trim();
+  const start = s.indexOf('['), end = s.lastIndexOf(']');
+  if(start!==-1 && end!==-1 && end>start) s = s.slice(start, end+1);
+  s = s.replace(/,(\s*[}\]])/g, '$1');
+  const arr = JSON.parse(s);
+  if(!Array.isArray(arr)) throw new Error('not an array');
+  return arr;
+}
+function buildCompanyFromAiJson(json){
+  const c = {
+    id:uid(), name:String(json.name||'').trim() || '(名称未設定)',
+    industryMajor:'', industrySub:'', location:'',
+    salaryBase:'', salaryAllowance:'', salaryTotal:'', avgSalary:'', overtime:'', paidLeaveRate:'',
+    annualHolidays:'', avgTenure:'', turnoverRate:'', transfer:'', remote:'', employeeCount:'',
+    mainBusiness:'', strengths:'', weaknesses:'', url:'', tags:[], dsFit:0,
+    tier:'', status:[], memo:'', events:[], favorite:false, esRecords:[],
+  };
+  AI_FILL_KEYS.forEach(k=>{
+    if(json[k]===undefined || json[k]===null) return;
+    if(k==='tags'){
+      let t = json.tags;
+      if(typeof t==='string') t = t.split(/[,、]/).map(x=>x.trim()).filter(Boolean);
+      if(Array.isArray(t)) c.tags = t.map(String);
+    } else if(k==='dsFit'){
+      const n = Number(json.dsFit);
+      if(!Number.isNaN(n)) c.dsFit = Math.max(0, Math.min(5, Math.round(n)));
+    } else {
+      c[k] = String(json[k]);
+    }
+  });
+  if(!c.tags.includes('AI入力(要確認)')) c.tags = [...c.tags, 'AI入力(要確認)'];
+  return c;
+}
+function openBulkAdd(){
+  const overlay = document.getElementById('overlay');
+  overlay.innerHTML = `
+    <div class="modal wide">
+      <div class="modal-hd"><h2>🤖 複数の企業をまとめて追加</h2><button class="modal-x" id="closeBulkAdd">&times;</button></div>
+      <div class="modal-bd">
+        <p class="note" style="margin:0 0 10px;">① 調べたい企業名をカンマまたは改行区切りで入力 → ② 「プロンプトを作成」→ ③ ChatGPTやClaudeに貼り付けて送信 → ④ 返ってきたJSON配列を下の欄に貼り付けて「追加する」を押してください。既存の企業データは上書きされず、新しい企業として追加されます。</p>
+        <div class="field">
+          <label class="lbl">調べたい企業名（カンマ・読点・改行区切りで複数可）</label>
+          <textarea class="ta" id="bulkNames" rows="3" placeholder="例: 三井住友銀行, 楽天グループ, 日立製作所"></textarea>
+        </div>
+        <div style="text-align:right;margin-bottom:10px;"><button type="button" class="btn btn-gray btn-sm" id="btnBulkMakePrompt">プロンプトを作成</button></div>
+        <div id="bulkPromptBox" style="display:none;margin-bottom:16px;background:var(--bg);border-radius:10px;padding:12px;">
+          <textarea class="ta" id="bulkPrompt" rows="8" readonly style="font-size:11.5px;font-family:monospace;"></textarea>
+          <div style="text-align:right;margin-top:4px;"><button type="button" class="btn btn-gray btn-sm" id="btnBulkCopyPrompt">📋 プロンプトをコピー</button></div>
+          <label class="lbl" style="margin-top:10px;">AIの回答（JSON配列）を貼り付け</label>
+          <textarea class="ta" id="bulkResponse" rows="8" placeholder='[{"name": "...", ...}, ...]' autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;flex-wrap:wrap;gap:6px;">
+            <p class="note" style="margin:0;">⚠️ AIが調べた内容は実際と異なる場合があります。追加後は必ず一次情報で確認してください。</p>
+            <button type="button" class="btn btn-primary btn-sm" id="btnBulkApply">追加する</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  overlay.style.display='flex';
+  const close = ()=>{ overlay.style.display='none'; overlay.innerHTML=''; };
+  overlay.querySelector('#closeBulkAdd').addEventListener('click', close);
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) close(); });
+  overlay.querySelector('#btnBulkMakePrompt').addEventListener('click', ()=>{
+    const names = overlay.querySelector('#bulkNames').value;
+    overlay.querySelector('#bulkPrompt').value = buildBulkAiPrompt(names);
+    overlay.querySelector('#bulkPromptBox').style.display = 'block';
+  });
+  overlay.querySelector('#btnBulkCopyPrompt').addEventListener('click', ()=>{
+    const ta = overlay.querySelector('#bulkPrompt');
+    ta.select();
+    const done = ()=>{ const btn=overlay.querySelector('#btnBulkCopyPrompt'); const old=btn.textContent; btn.textContent='コピーしました'; setTimeout(()=>{btn.textContent=old;},1500); };
+    if(navigator.clipboard){ navigator.clipboard.writeText(ta.value).then(done).catch(()=>{ try{document.execCommand('copy'); done();}catch(e){alert('コピーに失敗しました');} }); }
+    else { try{document.execCommand('copy'); done();}catch(e){alert('コピーに失敗しました');} }
+  });
+  overlay.querySelector('#btnBulkApply').addEventListener('click', ()=>{
+    const raw = overlay.querySelector('#bulkResponse').value;
+    if(!raw.trim()){ alert('AIの回答（JSON配列）を貼り付けてください'); return; }
+    let arr;
+    try{ arr = parseBulkAiJson(raw); }catch(e){ alert('JSONの読み取りに失敗しました。[ から ] まで、AIの回答全体をそのまま貼り付けているか確認してください。'); return; }
+    if(arr.length===0){ alert('企業データが1件も見つかりませんでした。'); return; }
+    const newCompanies = arr.map(buildCompanyFromAiJson);
+    saveCompanies([...companies, ...newCompanies]);
+    close();
+    afterChange();
+    alert(`${newCompanies.length}社を追加しました。内容を確認し、必要に応じて編集してください（タグに「AI入力(要確認)」を追加しています）。`);
+  });
 }
 // 業界の大分類（固定候補。詳細分類はここから選ぶと候補が絞り込まれる）
 const INDUSTRY_MAJOR_LIST = ['金融','IT・メディア','自動車・機械','小売・卸','サービス','建設・不動産','物流・運送','資源・素材','電機・精密','食品','生活関連','飲食','娯楽・レジャー','その他'];
@@ -1004,10 +1134,11 @@ function buildEditModal(c){
 
         <div data-edittabpage="overview">
           <div class="field">
+            <p class="note" style="margin:0 0 6px;">👆 まず上の「企業名」を入力してから、下のボタンを押してください（企業名入りのプロンプトが自動で作られます）。</p>
             <button type="button" class="btn btn-gray" id="btnToggleAiFill">🤖 AIに調べてもらって一括入力</button>
           </div>
           <div id="aiFillBox" style="display:none;margin-bottom:16px;background:var(--bg);border-radius:10px;padding:12px;">
-            <p class="note" style="margin:0 0 8px;">① 下のプロンプトをコピーし、ChatGPTやClaudeなどに貼り付けて（企業名の部分を書き換えて）送信 → ② 返ってきたJSONをそのまま下の欄に貼り付けて「反映」を押してください。</p>
+            <p class="note" style="margin:0 0 8px;">① 下のプロンプトをコピーし、ChatGPTやClaudeなどに貼り付けて送信 → ② 返ってきたJSONをそのまま下の欄に貼り付けて「反映」を押してください。</p>
             <textarea class="ta" id="aiPrompt" rows="6" readonly style="font-size:11.5px;font-family:monospace;">${esc(buildAiPrompt(c.name))}</textarea>
             <div style="text-align:right;margin-top:4px;"><button type="button" class="btn btn-gray btn-sm" id="btnCopyAiPrompt">📋 プロンプトをコピー</button></div>
             <label class="lbl" style="margin-top:10px;">AIの回答（JSON）を貼り付け</label>
@@ -1743,6 +1874,7 @@ document.getElementById('btnCancelCmp').addEventListener('click', ()=>{
   renderContent();
 });
 document.getElementById('btnAddCo').addEventListener('click', openAddCompany);
+document.getElementById('btnBulkAdd').addEventListener('click', openBulkAdd);
 
 // ───────────────────────── テーマ切り替え ─────────────────────────
 const LS_THEME_KEY = 'career-map-theme';
